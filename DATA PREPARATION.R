@@ -59,3 +59,4 @@ write.csv(no_events, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3
 write.csv(hna_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA events raw data RCRD 20240216.csv")
 write.csv(pcsp_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/PCSP events raw data RCRD 20240216.csv")
 
+hna_pcsp_data <- rbind(hna_data, pcsp_data) #this dataset now contains all unique HNA and PCSP records
