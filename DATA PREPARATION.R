@@ -75,4 +75,9 @@ hna_pcsp_data <- rbind(hna_data, pcsp_data) #this dataset now contains all uniqu
 
 
 ####### Patient-level combined dataset - row for each patient with record of earliest HNA and PCSP for each person ######
+hna_data <- hna_data %>%
+  group_by(patientid) %>%
+  mutate(hna_count = n())
+  
+  
 include count of HNAs and PCSPs per patient 

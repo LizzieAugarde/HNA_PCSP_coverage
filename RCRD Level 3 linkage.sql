@@ -35,7 +35,7 @@ select pat.patientid,
         rank () over (partition by pat.patientid order by tum.diagnosisdatebest, tum.tumourid asc) as rank
 from av2021.at_patient_england@casref01 pat 
         left join av2021.at_tumour_england@casref01 tum on pat.patientid = tum.patientid
-        left join analysisncr.at_rapid_pathway@cas2312 rp on pat.nhsnumber = rp.nhsnumber
+        left join analysisncr.at_rapid_pathway@cas2401 rp on pat.nhsnumber = rp.nhsnumber
 and rp.event_type in (20, 24)
 where tum.diagnosisyear = 2021
 and tum.cascade_inci_flag = 1 --standard CAS exclusions
