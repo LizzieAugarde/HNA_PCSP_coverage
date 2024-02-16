@@ -59,13 +59,20 @@ write.csv(no_events, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3
 write.csv(hna_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA events raw data RCRD 20240216.csv")
 write.csv(pcsp_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/PCSP events raw data RCRD 20240216.csv")
 
-hna_pcsp_data <- rbind(hna_data, pcsp_data) #this dataset now contains all unique HNA and PCSP records
 
-
-####### Patient-level combined dataset - row for each patient with record of earliest HNA and PCSP for each person ######
+###### Adding ranking of HNAs and PCSPs by date (earliest ranked 1) ######
 rank_by_date <- function(data, pid_col, date_col) {
   data %>%
     group_by({{ pid_col }}) %>%
     arrange({{ date_col }}) %>%
     mutate(rank = row_number())
 }
+
+hna_data <- rank_by_date(hna_data, patientid, event_date)
+pcsp_data <- rank_by_date(pcsp_data, patientid, event_date)
+
+hna_pcsp_data <- rbind(hna_data, pcsp_data) #this dataset now contains all unique and ranked HNA and PCSP records
+
+
+####### Patient-level combined dataset - row for each patient with record of earliest HNA and PCSP for each person ######
+include count of HNAs and PCSPs per patient 
