@@ -60,3 +60,12 @@ write.csv(hna_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 
 write.csv(pcsp_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/PCSP events raw data RCRD 20240216.csv")
 
 hna_pcsp_data <- rbind(hna_data, pcsp_data) #this dataset now contains all unique HNA and PCSP records
+
+
+####### Patient-level combined dataset - row for each patient with record of earliest HNA and PCSP for each person ######
+rank_by_date <- function(data, pid_col, date_col) {
+  data %>%
+    group_by({{ pid_col }}) %>%
+    arrange({{ date_col }}) %>%
+    mutate(rank = row_number())
+}
