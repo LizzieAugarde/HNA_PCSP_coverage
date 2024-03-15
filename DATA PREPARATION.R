@@ -72,7 +72,6 @@ only_hna <- setdiff(ids_hna, ids_pcsp) #13742 patients with only an HNA
 only_pcsp <- setdiff(ids_pcsp, ids_hna) #9160 patients with only a PCSP
 both <- intersect(ids_hna, ids_pcsp) #72056 patients with both 
 
-
 #write out record level HNA and PCSP data, and unique patients with neither
 write.csv(no_events, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/Patients with no events raw data RCRD 20240315.csv")
 write.csv(hna_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA events raw data RCRD 20240315.csv")
@@ -92,15 +91,57 @@ pcsp_data <- rank_by_date(pcsp_data, patientid, event_date)
 
 hna_pcsp_data <- rbind(hna_data, pcsp_data) #this dataset now contains all unique and ranked HNA and PCSP records
 
-
 #write out record level ranked HNA and PCSP data
-write.csv(no_events, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA and PCSPs in RCRD ranked by patient 20240315.csv")
+write.csv(hna_pcsp_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA and PCSPs in RCRD ranked by patient 20240315.csv")
 
 
 ####### Patient-level combined dataset - row for each patient with record of earliest HNA and PCSP for each person ######
-hna_data <- hna_data %>%
+#count of HNAs and PCSPs per patient
+hna_count <- hna_data %>%
   group_by(patientid) %>%
-  mutate(hna_count = n())
+  mutate(hna_count = n()) %>%
+  select(patientid, hna_count) %>%
+  unique()
   
+pcsp_count <- pcsp_data %>%
+  group_by(patientid) %>%
+  mutate(pcsp_count = n()) %>%
+  select(patientid, pcsp_count) %>%
+  unique()
+
+hna_data <- hna_data %>%
+  filter(rank == 1) %>%
+  rename("hna_event_type" = "event_type", "hna_point_of_pathway" = "point_of_pathway", "hna_staff_role" = "staff_role", "hna_date" = "event_date")
+
+pcsp_data <- pcsp_data %>% 
+  filter(rank == 1) %>%
+  select(c(patientid, event_type, point_of_pathway, offered_code, staff_role, event_date)) %>%
+  rename("pcsp_event_type" = "event_type", "pcsp_point_of_pathway" = "point_of_pathway", "pcsp_staff_role" = "staff_role", "pcsp_date" = "event_date")
+
+patient_level_data <- inner_join(hna_data, pcsp_data, by = "patientid")
+
+hna_only_patient_level <- anti_join(hna_data, patient_level_data, by = "patientid") %>%
+  mutate(pcsp_event_type = NA, pcsp_point_of_pathway = NA, pcsp_staff_role = NA, pcsp_date = NA)
+
+pcsp_only_patient_level <- anti_join(pcsp_data, patient_level_data, by = "patientid") %>%
+  mutate(hna_event_type = NA, hna_point_of_pathway = NA, hna_staff_role = NA, hna_date = NA)
+
+no_events <- no_events %>%
+  mutate(hna_event_type = NA, hna_point_of_pathway = NA, hna_staff_role = NA, hna_date = NA,
+         pcsp_event_type = NA, pcsp_point_of_pathway = NA, pcsp_staff_role = NA, pcsp_date = NA)
+
+#combining all groups of patients into one patient-level data frame 
+patient_level_data <- rbind(patient_level_data, hna_only_patient_level, pcsp_only_patient_level, no_events) 
+
+#adding in HNA and PCSP counts for each patient
+patient_level_data <- left_join(patient_level_data, hna_count, by = "patientid")
+patient_level_data <- left_join(patient_level_data, pcsp_count, by = "patientid")
+
+patient_level_data <- patient_level_data %>%
+  mutate(hna_count = ifelse(is.na(hna_count), 0, hna_count),
+         pcsp_count = ifelse(is.na(pcsp_count), 0, pcsp_count))
   
-include count of HNAs and PCSPs per patient 
+
+#write out patient-level HNA and PCSP data
+write.csv(patient_level_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/Patient-level RCRD HNA and PCSP data 20240315.csv")
+
