@@ -69,7 +69,7 @@ only_noevents <- setdiff(ids_noevents, union(ids_hna, ids_pcsp)) #matches no_eve
 in_noevents_and_hna_not_pcsp <- intersect(setdiff(ids_noevents, ids_pcsp), setdiff(ids_hna, ids_pcsp)) #empty, correct
 in_noevents_and_pcsp_not_hna <- intersect(setdiff(ids_noevents, ids_hna), setdiff(ids_pcsp, ids_hna)) #empty, correct
 only_hna <- setdiff(ids_hna, ids_pcsp) #13742 patients with only an HNA
-only_pcsp <-setdiff(ids_pcsp, ids_hna) #9160 patients with only a PCSP
+only_pcsp <- setdiff(ids_pcsp, ids_hna) #9160 patients with only a PCSP
 both <- intersect(ids_hna, ids_pcsp) #72056 patients with both 
 
 
