@@ -21,10 +21,11 @@ raw_data <- dbGetQueryOracle(cas2401, "SELECT * FROM HNA_PCSP_2021DIAGS", rowlim
 
 raw_data <- raw_data %>% 
   clean_names() %>%
+  filter(age > 17) %>%
   mutate(hna = case_when(event_type == 20 ~ "Y", TRUE ~ "N"),
          pcsp = case_when(event_type == 24 ~ "Y", TRUE ~ "N"))
 
-sum(raw_data$hna == "Y" | raw_data$pcsp == "Y") #1918680 records of a HNA/PCSP
+sum(raw_data$hna == "Y" | raw_data$pcsp == "Y") #1917398 records of a HNA/PCSP##########U18s excluded to here but need to redo eveyrhting else 
 
 hna_pcsp_data <- raw_data %>%
   unique() %>% #removing duplicate rows
