@@ -5,6 +5,7 @@
 
 #Created November 2023 by Lizzie Augarde 
 #Change log:
+#15/03/2024 adjusted approach to counting patients
 ############################################################### 
 
 #prep
@@ -50,9 +51,9 @@ hna_pcsp_data <- left_join(hna_pcsp_data, imd_data, by = c("patientid" = "PATIEN
 
 
 #splitting into HNA/PCSP/neither
-no_events <- hna_pcsp_data %>% filter(hna == "N" & pcsp == "N") %>% unique() #216669 patients with no events
-hna_data <- hna_pcsp_data %>% filter(hna == "Y") %>% unique() #151216 HNA records
-pcsp_data <- hna_pcsp_data %>% filter(pcsp == "Y") %>% unique() #121091 PCSP records
+no_events <- hna_pcsp_data %>% filter(hna == "N" & pcsp == "N") #216669 patients with no events
+hna_data <- hna_pcsp_data %>% filter(hna == "Y") #151216 HNA records
+pcsp_data <- hna_pcsp_data %>% filter(pcsp == "Y") #121091 PCSP records
 
 
 #overall numbers of patients with HNAs/PCSPs/combination
@@ -70,6 +71,7 @@ in_noevents_and_pcsp_not_hna <- intersect(setdiff(ids_noevents, ids_hna), setdif
 only_hna <- setdiff(ids_hna, ids_pcsp) #13742 patients with only an HNA
 only_pcsp <-setdiff(ids_pcsp, ids_hna) #9160 patients with only a PCSP
 both <- intersect(ids_hna, ids_pcsp) #72056 patients with both 
+
 
 #write out record level HNA and PCSP data, and unique patients with neither
 write.csv(no_events, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/Patients with no events raw data RCRD 20240315.csv")
@@ -89,6 +91,10 @@ hna_data <- rank_by_date(hna_data, patientid, event_date)
 pcsp_data <- rank_by_date(pcsp_data, patientid, event_date)
 
 hna_pcsp_data <- rbind(hna_data, pcsp_data) #this dataset now contains all unique and ranked HNA and PCSP records
+
+
+#write out record level ranked HNA and PCSP data
+write.csv(no_events, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA and PCSPs in RCRD ranked by patient 20240315.csv")
 
 
 ####### Patient-level combined dataset - row for each patient with record of earliest HNA and PCSP for each person ######
