@@ -31,8 +31,8 @@ hna_pcsp_data <- raw_data %>%
   unique() %>% #removing duplicate rows
   separate(event_property_1, c("point_of_pathway", "offered_code", "staff_role"), ":") 
 
-length(unique(hna_pcsp_data$patientid)) #311627 patients (329665 diagnoses in NS publication, remember DCO and C44)
-sum(hna_pcsp_data$hna == "Y" | hna_pcsp_data$pcsp == "Y") #272307 unique records of a HNA/PCSP
+length(unique(hna_pcsp_data$patientid)) #309870 patients
+sum(hna_pcsp_data$hna == "Y" | hna_pcsp_data$pcsp == "Y") #272217 unique records of a HNA/PCSP
 
 
 #adding IMD data 
@@ -52,15 +52,14 @@ hna_pcsp_data <- left_join(hna_pcsp_data, imd_data, by = c("patientid" = "PATIEN
 
 
 #splitting into HNA/PCSP/neither
-no_events <- hna_pcsp_data %>% filter(hna == "N" & pcsp == "N") #216669 patients with no events
-hna_data <- hna_pcsp_data %>% filter(hna == "Y") #151216 HNA records
-pcsp_data <- hna_pcsp_data %>% filter(pcsp == "Y") #121091 PCSP records
-
+no_events <- hna_pcsp_data %>% filter(hna == "N" & pcsp == "N") #214969 patients with no events
+hna_data <- hna_pcsp_data %>% filter(hna == "Y") #151171 HNA records
+pcsp_data <- hna_pcsp_data %>% filter(pcsp == "Y") #121046 PCSP records
 
 #overall numbers of patients with HNAs/PCSPs/combination
-length(unique(no_events$patientid)) #check these patients are unique 
-length(unique(hna_data$patientid)) #85798 patients with at least one HNA record
-length(unique(pcsp_data$patientid)) #81216 patients with at least one PCSP record
+length(unique(hna_data$patientid)) #85756 patients with at least one HNA record
+length(unique(pcsp_data$patientid)) #81174 patients with at least one PCSP record
+length(unique(rbind(hna_data, pcsp_data)$patientid))#94901 patients with either
 
 ids_noevents <- unique(no_events$patientid)
 ids_hna <- unique(hna_data$patientid)
@@ -69,14 +68,14 @@ ids_pcsp <- unique(pcsp_data$patientid)
 only_noevents <- setdiff(ids_noevents, union(ids_hna, ids_pcsp)) #matches no_events row number, correct
 in_noevents_and_hna_not_pcsp <- intersect(setdiff(ids_noevents, ids_pcsp), setdiff(ids_hna, ids_pcsp)) #empty, correct
 in_noevents_and_pcsp_not_hna <- intersect(setdiff(ids_noevents, ids_hna), setdiff(ids_pcsp, ids_hna)) #empty, correct
-only_hna <- setdiff(ids_hna, ids_pcsp) #13742 patients with only an HNA
-only_pcsp <- setdiff(ids_pcsp, ids_hna) #9160 patients with only a PCSP
-both <- intersect(ids_hna, ids_pcsp) #72056 patients with both 
+only_hna <- setdiff(ids_hna, ids_pcsp) #13727 patients with only an HNA
+only_pcsp <- setdiff(ids_pcsp, ids_hna) #9145 patients with only a PCSP
+both <- intersect(ids_hna, ids_pcsp) #72029 patients with both 
 
 #write out record level HNA and PCSP data, and unique patients with neither
-write.csv(no_events, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/Patients with no events raw data RCRD 20240315.csv")
-write.csv(hna_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA events raw data RCRD 20240315.csv")
-write.csv(pcsp_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/PCSP events raw data RCRD 20240315.csv")
+write.csv(no_events, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/Patients with no events raw data RCRD 20240318.csv")
+write.csv(hna_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA events raw data RCRD 20240318.csv")
+write.csv(pcsp_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/PCSP events raw data RCRD 20240318.csv")
 
 
 ###### Adding ranking of HNAs and PCSPs by date (earliest ranked 1) ######
