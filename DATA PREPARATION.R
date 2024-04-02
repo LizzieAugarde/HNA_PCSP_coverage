@@ -25,7 +25,7 @@ raw_data <- raw_data %>%
   mutate(hna = case_when(event_type == 20 ~ "Y", TRUE ~ "N"),
          pcsp = case_when(event_type == 24 ~ "Y", TRUE ~ "N"))
 
-sum(raw_data$hna == "Y" | raw_data$pcsp == "Y") #1917398 records of a HNA/PCSP##########U18s excluded to here but need to redo eveyrhting else 
+sum(raw_data$hna == "Y" | raw_data$pcsp == "Y") #1917398 records of a HNA/PCSP
 
 hna_pcsp_data <- raw_data %>%
   unique() %>% #removing duplicate rows
