@@ -23,17 +23,33 @@ raw_data <- raw_data %>%
   clean_names() %>%
   filter(age > 17) %>%
   mutate(hna = case_when(event_type == 20 ~ "Y", TRUE ~ "N"),
-         pcsp = case_when(event_type == 24 ~ "Y", TRUE ~ "N"))
+         pcsp = case_when(event_type == 24 ~ "Y", TRUE ~ "N")) %>%
+  
+  #limiting to records within 2 years of diagnosis 
+  mutate(time_diag_event = difftime(as.Date(event_date), as.Date(diagnosisdatebest), units = "days")) %>%
+  filter((time_diag_event < 731 & time_diag_event >= 0) | is.na(time_diag_event))
 
-sum(raw_data$hna == "Y" | raw_data$pcsp == "Y") #1917398 records of a HNA/PCSP
+sum(raw_data$hna == "Y" | raw_data$pcsp == "Y") #1752833 records of a HNA/PCSP
 
 hna_pcsp_data <- raw_data %>%
   unique() %>% #removing duplicate rows
   separate(event_property_1, c("point_of_pathway", "offered_code", "staff_role"), ":") 
 
-length(unique(hna_pcsp_data$patientid)) #309870 patients
+length(unique(hna_pcsp_data$patientid)) #309870 patients########not getting the same number of patients, need to work out why 
 sum(hna_pcsp_data$hna == "Y" | hna_pcsp_data$pcsp == "Y") #272217 unique records of a HNA/PCSP
+sum(hna_pcsp_data$hna == "Y") #151171 unique HNA records
+sum(hna_pcsp_data$pcsp == "Y") #121046 unique PCSP records
 
+#counting then excluding records with offered code 04 'Not offered'
+sum(hna_pcsp_data$hna == "Y" & hna_pcsp_data$offered_code == "04") #479 not offered HNA records
+sum(hna_pcsp_data$pcsp == "Y" & hna_pcsp_data$offered_code == "04") #9511 not offered PCSP records
+
+hna_pcsp_data <- hna_pcsp_data %>%
+  filter(offered_code != "04") #counting NA offered_code as offered for now
+
+sum(hna_pcsp_data$hna == "Y" | hna_pcsp_data$pcsp == "Y") #262227 unique records of an OFFERED HNA/PCSP 
+sum(hna_pcsp_data$hna == "Y") #150692 unique OFFERED HNA records
+sum(hna_pcsp_data$pcsp == "Y") #111535 unique OFFERED PCSP records
 
 #adding IMD data 
 query <- "select a.patientid,
@@ -92,6 +108,8 @@ pcsp_data <- rank_by_date(pcsp_data, patientid, event_date)
 hna_pcsp_data <- rbind(hna_data, pcsp_data) #this dataset now contains all unique and ranked HNA and PCSP records
 
 #write out record level ranked HNA and PCSP data
+write.csv(hna_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA in RCRD ranked by patient 20240315.csv")
+write.csv(pcsp_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/PCSPs in RCRD ranked by patient 20240315.csv")
 write.csv(hna_pcsp_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA and PCSPs in RCRD ranked by patient 20240315.csv")
 
 
@@ -102,7 +120,7 @@ hna_count <- hna_data %>%
   mutate(hna_count = n()) %>%
   select(patientid, hna_count) %>%
   unique()
-  
+
 pcsp_count <- pcsp_data %>%
   group_by(patientid) %>%
   mutate(pcsp_count = n()) %>%
@@ -143,5 +161,5 @@ patient_level_data <- patient_level_data %>%
   
 
 #write out patient-level HNA and PCSP data
-write.csv(patient_level_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/Patient-level RCRD HNA and PCSP data 20240315.csv")
+write.csv(patient_level_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/Patient-level RCRD HNA and PCSP data 20240403.csv")
 
