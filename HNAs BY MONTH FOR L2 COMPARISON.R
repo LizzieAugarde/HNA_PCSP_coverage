@@ -5,16 +5,18 @@
 
 #Created February 2024 by Lizzie Augarde 
 #Change log:
+#05/04/2024 converted to only compare offered and accepted HNAs
 ############################################################### 
 
 library(xlsx)
 
 ##### National-level #####
-raw_data_l2_comp <- raw_data %>% 
-  filter(event_type == 20)
+raw_data_l2_comp <- raw_data %>% #uses raw extract from SQL, no filtering etc
+  clean_names() %>%
+  separate(event_property_1, c("point_of_pathway", "offered_code", "staff_role"), ":") %>%
+  filter(event_type == 20 & offered_code == "03") 
 
 hna_data_all <- raw_data_l2_comp %>% #not removing duplicates
-  clean_names() %>%
   mutate(event_year = year(as.Date(event_date))) %>%
   mutate(event_month = month(as.Date(event_date)))
 
@@ -58,8 +60,8 @@ hnas_by_month_unique_trust <- hna_data_unique %>%
   pivot_wider(names_from = event_ym, values_from = count) %>%
   mutate_if(is.numeric , replace_na, replace = 0)
 
-write.xlsx(as.data.frame(hnas_by_month_all_trust), "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/HNAs by month for L2 comparison 20240216.xlsx", 
+write.xlsx(as.data.frame(hnas_by_month_all_trust), "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/HNAs by month for L2 comparison 20240405.xlsx", 
            sheetName = "All records by Trust", row.names = FALSE, append = TRUE)
 
-write.xlsx(as.data.frame(hnas_by_month_unique_trust), "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/HNAs by month for L2 comparison 20240216.xlsx", 
+write.xlsx(as.data.frame(hnas_by_month_unique_trust), "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/HNAs by month for L2 comparison 20240405.xlsx", 
            sheetName = "Unique records by Trust", row.names = FALSE, append = TRUE)
