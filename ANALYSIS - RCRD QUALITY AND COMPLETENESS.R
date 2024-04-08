@@ -41,7 +41,7 @@ death_check_pcsp <- hna_pcsp_data %>%
 
 ###### Records occurring before diagnosis date for those with no previous diagnosis ######
 prev_diags <- dbGetQueryOracle(casref01, "select p.patientid
-                                                from analysiselizabethaugarde.hna_pcsp_2021diags@cas2401 p 
+                                                from analysiselizabethaugarde.hna_pcsp_2021diags@cas2402 p 
                                                 left join av2021.at_tumour_england@casref01 t on p.patientid = t.patientid
                                                 where t.diagnosisyear < 2021", rowlimit = NA)
 
