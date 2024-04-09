@@ -26,9 +26,3 @@ pcsp_count_summary <- patient_level_data %>%
   ungroup() %>%
   mutate(percent_patients = (number_patients / sum(number_patients)) * 100)
 
-#by gender
-#by age group at diagnosis 
-#by ethnicity 
-#by stage
-#by tumour type 
-#by IMD
