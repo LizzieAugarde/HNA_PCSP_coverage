@@ -1,6 +1,3 @@
-
-
-
 ################ HNA/PCSP coverage analysis - coverage by characteristics ###################
 
 #Analysis for proposal aim XXXX - proportion of people being offered an HNA/PCSP by 
