@@ -35,7 +35,7 @@ query <- "select * from (
   rank () over (partition by pat.patientid order by tum.diagnosisdatebest, tum.tumourid asc) as rank
   from av2021.at_patient_england@casref01 pat 
   left join av2021.at_tumour_england@casref01 tum on pat.patientid = tum.patientid
-  left join av2021.at_geography_england@casref01 geo on tum.patientid = geo.tumourid
+  left join av2021.at_geography_england@casref01 geo on tum.tumourid = geo.tumourid
   left join imd.imd2019_equal_lsoas@casref01 imd on geo.lsoa11_code = imd.lsoa11_code
   where tum.diagnosisyear = 2021
   and tum.cascade_inci_flag = 1 
@@ -51,7 +51,8 @@ where rank = 1"
 patient_cohort <- dbGetQueryOracle(cas2403, query, rowlimit = NA)
 
 patient_cohort <- patient_cohort %>% 
-  clean_names()
+  clean_names() %>%
+  unique()
 
 #HNA and PCSP records------
 query <- "select * from (
@@ -246,7 +247,10 @@ patient_level_data <- left_join(patient_level_data, pcsp_count, by = "patientid"
 
 patient_level_data <- patient_level_data %>%
   mutate(hna_count = ifelse(is.na(hna_count), 0, hna_count),
-         pcsp_count = ifelse(is.na(pcsp_count), 0, pcsp_count))
+         pcsp_count = ifelse(is.na(pcsp_count), 0, pcsp_count)) %>%
+  select(-rank, hna_rank, pcsp_rank) %>%
+  mutate(hna_status = ifelse(hna_count > 0, "Has HNA", "No HNA"),
+         pcsp_status = ifelse(pcsp_count > 0, "Has PCSP", "No PCSP"))
 
 #write out patient-level HNA and PCSP data
 write.csv(patient_level_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/Patient-level RCRD HNA and PCSP data 20240508.csv")
