@@ -49,12 +49,16 @@ ggplot(filter(gender_hna, gender_hna$hna_status == "Has HNA"), aes(x = gender, y
   scale_y_continuous(limits = c(0, 100)) +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
+ggsave("N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/Graphs/Gender_HNA.png")
+
 ggplot(filter(gender_pcsp, gender_pcsp$pcsp_status == "Has PCSP"), aes(x = gender, y = percent_patients)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Gender", y = "Percentage of patients offered a PCSP") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+ggsave("N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/Graphs/Gender_PCSP.png")
 
 
 ####by age at diag-------------------
@@ -103,6 +107,8 @@ ggplot(filter(age_hna, age_hna$hna_status == "Has HNA"),
   scale_y_continuous(limits = c(0, 100)) +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
+ggsave("N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/Graphs/Age_HNA.png")
+
 ggplot(filter(age_pcsp, age_pcsp$pcsp_status == "Has PCSP"),
        aes(x = factor(age_group, levels = c("Under 20", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+")),
            y = percent_patients)) + 
@@ -111,6 +117,8 @@ ggplot(filter(age_pcsp, age_pcsp$pcsp_status == "Has PCSP"),
   labs(x = "Age at diagnosis", y = "Percentage of patients offered a PCSP") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+ggsave("N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/Graphs/Age_PCSP.png")
 
 
 ####by ethnicity-------------------

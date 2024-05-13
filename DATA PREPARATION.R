@@ -31,6 +31,8 @@ query <- "select * from (
   tum.deathdatebest,
   tum.diag_trust,
   geo.lsoa11_code,
+  geo.parl_con_name,
+  geo.utla_2021_name,
   imd.imd19_decile_lsoas,
   rank () over (partition by pat.patientid order by tum.diagnosisdatebest, tum.tumourid asc) as rank
   from av2021.at_patient_england@casref01 pat 
@@ -99,7 +101,7 @@ raw_hna_pcsp_data <- raw_hna_pcsp_data %>%
          pcsp = case_when(event_type == 24 ~ "Y", TRUE ~ "N")) %>%
   
   #joining to patient cohort to get demographic info 
-  left_join(., patient_cohort %>% select(patientid, site_icd10_o2_3char, stage_best, gender, age, ethnicity, deathdatebest, lsoa11_code, imd19_decile_lsoas), 
+  left_join(., patient_cohort %>% select(patientid, site_icd10_o2_3char, stage_best, gender, age, ethnicity, deathdatebest, lsoa11_code, imd19_decile_lsoas, parl_con_name), 
             by = "patientid")
 
 sum(raw_hna_pcsp_data$hna == "Y" | raw_hna_pcsp_data$pcsp == "Y") #1815300 records of a HNA/PCSP
