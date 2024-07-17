@@ -14,7 +14,7 @@ library(NDRSAfunctions)
 library(tidyverse)
 library(janitor)
 
-cas2403 <- createConnection(port = 1525, sid = "cas2403")
+cas2405 <- createConnection(port = 1525, sid = "cas2405")
 
 ###### EXTRACTING AND CLEANING RAW DATA #######
 #patient cohort----
@@ -43,14 +43,14 @@ query <- "select * from (
   and tum.cascade_inci_flag = 1 
   and tum.dco = 'N'
   and tum.dedup_flag = 1
-  and tum.age >17
+  --and tum.age >17 --removed 17/07/2024
   and ((tum.deathdatebest is null) or (tum.diagnosisdatebest != tum.deathdatebest)) 
   and ((tum.deathdatebest is null) or (tum.deathdatebest - tum.diagnosisdatebest > 0)) 
   and substr(tum.site_icd10_o2_3char, 1, 1) = 'C' 
   and tum.site_icd10_o2_3char <> 'C44') 
 where rank = 1"
 
-patient_cohort <- dbGetQueryOracle(cas2403, query, rowlimit = NA)
+patient_cohort <- dbGetQueryOracle(cas2405, query, rowlimit = NA)
 
 patient_cohort <- patient_cohort %>% 
   clean_names() %>%
@@ -74,12 +74,12 @@ query <- "select * from (
   rank () over (partition by pat.patientid order by tum.diagnosisdatebest, tum.tumourid asc) as rank
   from av2021.at_patient_england@casref01 pat 
   left join av2021.at_tumour_england@casref01 tum on pat.patientid = tum.patientid
-  left join analysisncr.at_rapid_pathway@cas2403 rp on pat.nhsnumber = rp.nhsnumber 
+  left join analysisncr.at_rapid_pathway@cas2405 rp on pat.nhsnumber = rp.nhsnumber 
   where tum.diagnosisyear = 2021
   and tum.cascade_inci_flag = 1 
   and tum.dco = 'N'
   and tum.dedup_flag = 1
-  and tum.age >17
+  --and tum.age >17 ---removed 17/07/2024
   and ((tum.deathdatebest is null) or (tum.diagnosisdatebest != tum.deathdatebest)) 
   and ((tum.deathdatebest is null) or (tum.deathdatebest - tum.diagnosisdatebest > 0)) 
   and substr(tum.site_icd10_o2_3char, 1, 1) = 'C' 
@@ -87,7 +87,7 @@ query <- "select * from (
   and rp.event_type in (20, 24))
 where rank = 1"
 
-raw_hna_pcsp_data <- dbGetQueryOracle(cas2403, query, rowlimit = NA)
+raw_hna_pcsp_data <- dbGetQueryOracle(cas2405, query, rowlimit = NA)
 
 raw_hna_pcsp_data <- raw_hna_pcsp_data %>% 
   clean_names() %>%
@@ -104,7 +104,7 @@ raw_hna_pcsp_data <- raw_hna_pcsp_data %>%
   left_join(., patient_cohort %>% select(patientid, site_icd10_o2_3char, stage_best, gender, age, ethnicity, deathdatebest, lsoa11_code, imd19_decile_lsoas, parl_con_name), 
             by = "patientid")
 
-sum(raw_hna_pcsp_data$hna == "Y" | raw_hna_pcsp_data$pcsp == "Y") #1815300 records of a HNA/PCSP
+all_records <- sum(raw_hna_pcsp_data$hna == "Y" | raw_hna_pcsp_data$pcsp == "Y") #1873053 records of a HNA/PCSP
 
 
 ###### REMOVING DUPLICATES, INITIAL NUMBERS #######
@@ -112,21 +112,23 @@ hna_pcsp_data <- raw_hna_pcsp_data %>%
   unique() %>% #removing duplicate rows
   separate(event_property_1, c("point_of_pathway", "offered_code", "staff_role"), ":") 
 
-length(unique(patient_cohort$patientid)) #309870 patients in overall denominator
-sum(hna_pcsp_data$hna == "Y" | hna_pcsp_data$pcsp == "Y") #244397 unique records of a HNA/PCSP
-sum(hna_pcsp_data$hna == "Y") #133923 unique HNA records
-sum(hna_pcsp_data$pcsp == "Y") #110474 unique PCSP records
+denom_size <- length(unique(patient_cohort$patientid)) #311627 patients in overall denominator
+unique_hnas_pcsps <- sum(hna_pcsp_data$hna == "Y" | hna_pcsp_data$pcsp == "Y") #245323 unique records of a HNA/PCSP
+unique_hnas <-sum(hna_pcsp_data$hna == "Y") #134245 unique HNA records
+unique_pcsps <-sum(hna_pcsp_data$pcsp == "Y") #111078 unique PCSP records
 
 #counting then excluding records with offered code 04 'Not offered'
-sum(hna_pcsp_data$hna == "Y" & hna_pcsp_data$offered_code == "04") #465 not offered HNA records
-sum(hna_pcsp_data$pcsp == "Y" & hna_pcsp_data$offered_code == "04") #8561 not offered PCSP records
+hnas_notoff <- sum(hna_pcsp_data$hna == "Y" & hna_pcsp_data$offered_code == "04") #466 not offered HNA records
+pcsps_notoff <- sum(hna_pcsp_data$pcsp == "Y" & hna_pcsp_data$offered_code == "04") #8705 not offered PCSP records
 
 hna_pcsp_data <- hna_pcsp_data %>%
   filter(offered_code != "04" | is.na(offered_code)) #counting NA or invalid offered_code as offered for now
 
-sum(hna_pcsp_data$hna == "Y" | hna_pcsp_data$pcsp == "Y") #235371 unique records of an OFFERED HNA/PCSP 
-sum(hna_pcsp_data$hna == "Y") #133458 unique OFFERED HNA records
-sum(hna_pcsp_data$pcsp == "Y") #101913 unique OFFERED PCSP records
+unique_off_hnas_pcsps <- sum(hna_pcsp_data$hna == "Y" | hna_pcsp_data$pcsp == "Y") #236076 unique records of an OFFERED HNA/PCSP 
+unique_off_hnas <- sum(hna_pcsp_data$hna == "Y") #133735 unique OFFERED HNA records
+unique_off_pcsps <- sum(hna_pcsp_data$pcsp == "Y") #102341 unique OFFERED PCSP records
+
+pcsps_notreq <- sum(hna_pcsp_data$pcsp == "Y" & hna_pcsp_data$offered_code == "06") #40824 not required PCSP records
 
 
 ###### REMOVING NON-SUBMITTING TRUSTS #######
@@ -156,26 +158,26 @@ pcsp_data <- hna_pcsp_data %>% filter(pcsp == "Y" & keepforpcsp == "INCLUDE")
 
 #patient denominator for HNA/PCSP after excluding trusts
 patient_cohort <- left_join(patient_cohort, by_trust, by = "diag_trust", relationship = "many-to-one")
-length(which(patient_cohort$keepforhna == "INCLUDE")) #304943 denominator for HNAs
-length(which(patient_cohort$keepforpcsp == "INCLUDE")) #297165 denominator for PCSPs
+hnas_denom_size <- length(which(patient_cohort$keepforhna == "INCLUDE")) #306399 denominator for HNAs
+pcsps_denom_size <- length(which(patient_cohort$keepforpcsp == "INCLUDE")) #300145 denominator for PCSPs
 
 
 ###### PATIENT NUMBERS AND DATASETS #######
 #overall numbers of patients with HNAs/PCSPs
-length(unique(hna_data$patientid)) #79717 patients with at least one HNA record
-length(unique(pcsp_data$patientid)) #71627 patients with at least one PCSP record
+pts_with_hna <- length(unique(hna_data$patientid)) #79866 patients with at least one HNA record
+pts_with_pcsp <- length(unique(pcsp_data$patientid)) #71863 patients with at least one PCSP record
 
 ids_hna <- unique(hna_data$patientid)
 ids_pcsp <- unique(pcsp_data$patientid)
-ids_either <- unique(c(ids_hna, ids_pcsp)) #86054 patients with at least one HNA or PCSP record
+ids_either <- length(unique(c(ids_hna, ids_pcsp))) #86347 patients with at least one HNA or PCSP record
 
-only_hna <- setdiff(ids_hna, ids_pcsp) #14427 patients with only an HNA 
-only_pcsp <- setdiff(ids_pcsp, ids_hna) #6337 patients with only a PCSP 
-both <- intersect(ids_hna, ids_pcsp) #65249 patients with both
+only_hna <- length(setdiff(ids_hna, ids_pcsp)) #14484 patients with only an HNA 
+only_pcsp <- length(setdiff(ids_pcsp, ids_hna)) #6481 patients with only a PCSP
+both <- length(intersect(ids_hna, ids_pcsp)) #65382 patients with both
 
 #write out record level HNA and PCSP data
-write.csv(hna_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA events raw data RCRD 20240508.csv")
-write.csv(pcsp_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/PCSP events raw data RCRD 20240508.csv")
+save(hna_data, file = "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA events raw data RCRD 20240717.RData")
+save(pcsp_data, file = "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/PCSP events raw data RCRD 20240717.RData")
 
 
 ###### RANKING BY DATE ######
@@ -192,9 +194,9 @@ pcsp_data <- rank_by_date(pcsp_data, patientid, event_date)
 hna_pcsp_data <- rbind(hna_data, pcsp_data) #this dataset now contains all unique and ranked HNA and PCSP records
 
 #write out record level ranked HNA and PCSP data
-write.csv(hna_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA in RCRD ranked by patient 20240408.csv")
-write.csv(pcsp_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/PCSPs in RCRD ranked by patient 20240408.csv")
-write.csv(hna_pcsp_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA and PCSPs in RCRD ranked by patient 20240408.csv")
+save(hna_data, file = "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA in RCRD ranked by patient 20240717.RData")
+save(pcsp_data, file = "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/PCSPs in RCRD ranked by patient 20240717.RData")
+save(hna_pcsp_data, file = "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA and PCSPs in RCRD ranked by patient 20240717.RData")
 
 
 ####### Patient-level combined dataset - row for each patient with record of earliest HNA and PCSP for each person ######
@@ -213,15 +215,15 @@ pcsp_count <- pcsp_data %>%
 
 hna_data <- hna_data %>%
   filter(rank == 1) %>%
-  select(-c(hna, pcsp, offered_code, event_end, keepforpcsp)) %>%
+  select(-c(hna, pcsp, event_end, keepforpcsp)) %>%
   rename("hna_event_type" = "event_type", "hna_point_of_pathway" = "point_of_pathway", "hna_staff_role" = "staff_role", "hna_date" = "event_date", 
-         "hna_rank" = "rank", "hna_time_diag_event" = "time_diag_event")
+         "hna_rank" = "rank", "hna_time_diag_event" = "time_diag_event", "hna_offered_code" = "offered_code")
 
 pcsp_data <- pcsp_data %>% 
   filter(rank == 1) %>%
-  select(c(patientid, event_type, point_of_pathway, offered_code, staff_role, event_date, rank, time_diag_event, keepforpcsp)) %>%
+  select(c(patientid, event_type, offered_code, point_of_pathway, staff_role, event_date, rank, time_diag_event, keepforpcsp)) %>%
   rename("pcsp_event_type" = "event_type", "pcsp_point_of_pathway" = "point_of_pathway", "pcsp_staff_role" = "staff_role", "pcsp_date" = "event_date", 
-         "pcsp_rank" = "rank", "pcsp_time_diag_event" = "time_diag_event")
+         "pcsp_rank" = "rank", "pcsp_time_diag_event" = "time_diag_event", "pcsp_offered_code" = "offered_code")
 
 both_patient_level <- inner_join(hna_data, pcsp_data, by = "patientid") 
 
@@ -255,5 +257,5 @@ patient_level_data <- patient_level_data %>%
          pcsp_status = ifelse(pcsp_count > 0, "Has PCSP", "No PCSP"))
 
 #write out patient-level HNA and PCSP data
-write.csv(patient_level_data, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/Patient-level RCRD HNA and PCSP data 20240508.csv")
+save(patient_level_data, file = "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/Patient-level RCRD HNA and PCSP data 20240717.RData")
 

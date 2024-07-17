@@ -20,10 +20,13 @@ gender_hna <- patient_level_data %>%
   summarise(number_patients = n()) %>%
   ungroup() %>%
   group_by(gender) %>%
-  mutate(percent_patients = (number_patients / sum(number_patients)) * 100,
+  mutate(percent = (number_patients/sum(number_patients))*100,
+         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
          lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = (sapply(lower, function(x) x$conf.int[2]))*100, 
-         lower = (sapply(lower, function(x) x$conf.int[1]))*100) %>%
+         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         lower_table = paste0(lower,"%"), 
+         upper_table = paste0(upper, "%")) %>%
   filter(!is.na(gender)) %>%
   mutate(gender = ifelse(gender == "1", "Male", "Female")) %>%
   ungroup()
@@ -34,15 +37,18 @@ gender_pcsp <- patient_level_data %>%
   summarise(number_patients = n()) %>%
   ungroup() %>%
   group_by(gender) %>%
-  mutate(percent_patients = (number_patients / sum(number_patients)) * 100,
+  mutate(percent = (number_patients/sum(number_patients))*100,
+         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
          lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = (sapply(lower, function(x) x$conf.int[2]))*100, 
-         lower = (sapply(lower, function(x) x$conf.int[1]))*100) %>%
+         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         lower_table = paste0(lower,"%"), 
+         upper_table = paste0(upper, "%")) %>%
   filter(!is.na(gender)) %>%
   mutate(gender = ifelse(gender == "1", "Male", "Female")) %>%
   ungroup()
 
-ggplot(filter(gender_hna, gender_hna$hna_status == "Has HNA"), aes(x = gender, y = percent_patients)) + 
+gender_hna_graph <- ggplot(filter(gender_hna, gender_hna$hna_status == "Has HNA"), aes(x = gender, y = percent)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Gender", y = "Percentage of patients offered a HNA") + 
@@ -51,7 +57,7 @@ ggplot(filter(gender_hna, gender_hna$hna_status == "Has HNA"), aes(x = gender, y
 
 ggsave("N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/Graphs/Gender_HNA.png")
 
-ggplot(filter(gender_pcsp, gender_pcsp$pcsp_status == "Has PCSP"), aes(x = gender, y = percent_patients)) + 
+gender_pcsp_graph <- ggplot(filter(gender_pcsp, gender_pcsp$pcsp_status == "Has PCSP"), aes(x = gender, y = percent)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Gender", y = "Percentage of patients offered a PCSP") + 
@@ -78,10 +84,13 @@ age_hna <- patient_level_data %>%
   summarise(number_patients = n()) %>%
   ungroup() %>%
   group_by(age_group) %>%
-  mutate(percent_patients = (number_patients / sum(number_patients)) * 100,
+  mutate(percent = (number_patients/sum(number_patients))*100,
+         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
          lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = (sapply(lower, function(x) x$conf.int[2]))*100, 
-         lower = (sapply(lower, function(x) x$conf.int[1]))*100) %>%
+         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         lower_table = paste0(lower,"%"), 
+         upper_table = paste0(upper, "%")) %>%
   filter(!is.na(age_group)) %>%
   ungroup() 
 
@@ -91,16 +100,19 @@ age_pcsp <- patient_level_data %>%
   summarise(number_patients = n()) %>%
   ungroup() %>%
   group_by(age_group) %>%
-  mutate(percent_patients = (number_patients / sum(number_patients)) * 100,
+  mutate(percent = (number_patients/sum(number_patients))*100,
+         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
          lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = (sapply(lower, function(x) x$conf.int[2]))*100, 
-         lower = (sapply(lower, function(x) x$conf.int[1]))*100) %>%
+         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         lower_table = paste0(lower,"%"), 
+         upper_table = paste0(upper, "%")) %>%
   filter(!is.na(age_group)) %>%
   ungroup() 
 
-ggplot(filter(age_hna, age_hna$hna_status == "Has HNA"), 
+age_hna_graph <- ggplot(filter(age_hna, age_hna$hna_status == "Has HNA"), 
        aes(x = factor(age_group, levels = c("Under 20", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+")),
-                                                             y = percent_patients)) + 
+           y = percent)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Age at diagnosis", y = "Percentage of patients offered a HNA") + 
@@ -109,9 +121,9 @@ ggplot(filter(age_hna, age_hna$hna_status == "Has HNA"),
 
 ggsave("N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/Graphs/Age_HNA.png")
 
-ggplot(filter(age_pcsp, age_pcsp$pcsp_status == "Has PCSP"),
+age_pcsp_graph <- ggplot(filter(age_pcsp, age_pcsp$pcsp_status == "Has PCSP"),
        aes(x = factor(age_group, levels = c("Under 20", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+")),
-           y = percent_patients)) + 
+           y = percent)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Age at diagnosis", y = "Percentage of patients offered a PCSP") + 
@@ -137,10 +149,13 @@ ethnicity_hna <- patient_level_data %>%
   summarise(number_patients = n()) %>%
   ungroup() %>%
   group_by(ethnicity_group) %>%
-  mutate(percent_patients = (number_patients / sum(number_patients)) * 100,
+  mutate(percent = (number_patients/sum(number_patients))*100,
+         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
          lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = (sapply(lower, function(x) x$conf.int[2]))*100, 
-         lower = (sapply(lower, function(x) x$conf.int[1]))*100) %>%
+         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         lower_table = paste0(lower,"%"), 
+         upper_table = paste0(upper, "%")) %>%
   filter(!is.na(ethnicity_group)) %>%
   ungroup()
 
@@ -150,21 +165,26 @@ ethnicity_pcsp <- patient_level_data %>%
   summarise(number_patients = n()) %>%
   ungroup() %>%
   group_by(ethnicity_group) %>%
-  mutate(percent_patients = (number_patients / sum(number_patients)) * 100,
+  mutate(percent = (number_patients/sum(number_patients))*100,
+         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
          lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = (sapply(lower, function(x) x$conf.int[2]))*100, 
-         lower = (sapply(lower, function(x) x$conf.int[1]))*100) %>%
+         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         lower_table = paste0(lower,"%"), 
+         upper_table = paste0(upper, "%")) %>%
   filter(!is.na(ethnicity_group)) %>%
   ungroup()
 
-ggplot(filter(ethnicity_hna, ethnicity_hna$hna_status == "Has HNA"), aes(x = ethnicity_group, y = percent_patients)) + 
+ethnicity_hna_graph <- ggplot(filter(ethnicity_hna, ethnicity_hna$hna_status == "Has HNA"), 
+                              aes(x = ethnicity_group, y = percent)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Ethnicity", y = "Percentage of patients offered a HNA") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
-ggplot(filter(ethnicity_pcsp, ethnicity_pcsp$pcsp_status == "Has PCSP"), aes(x = ethnicity_group, y = percent_patients)) + 
+ethnicity_pcsp_graph <- ggplot(filter(ethnicity_pcsp, ethnicity_pcsp$pcsp_status == "Has PCSP"), 
+                               aes(x = ethnicity_group, y = percent)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Ethnicity", y = "Percentage of patients offered a PCSP") + 
