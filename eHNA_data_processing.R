@@ -18,12 +18,14 @@ ehna_data <- vroom(ehna_data_files)
 
 #processing eHNA data
 ehna_data <- ehna_data %>%
+  unique() %>%
+  filter(substr(DiagnosisCode, 1, 1) == "C" & DiagnosisCode != "C44") %>%
   select(c(AssessmentId, DateSetUpYear, DateSetUpMonth, Status, ODS, Organisation)) %>%
   filter(!is.na(AssessmentId)) %>%
   mutate(month_text = month.abb[DateSetUpMonth],
          monthyear_text = paste0(month_text, "-", (str_sub(as.character(DateSetUpYear), 3, 4)))) %>%
-  filter(Status %in% c("locked", "submitted", "in progress")) %>%
-  filter(str_sub(ODS, 1, 1) == "R") %>%
+  filter(Status %in% c("locked", "submitted", "in progress")) %>% #matching modelled HNA process
+  filter(str_sub(ODS, 1, 1) == "R") %>% #England trusts only 
   group_by(ODS, monthyear_text) %>%
   summarise(count = n()) %>%
   pivot_wider(., names_from = monthyear_text, values_from = count) %>%
