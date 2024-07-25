@@ -243,5 +243,105 @@ imd_pcsp_graph <- ggplot(filter(imd_pcsp, imd_pcsp$pcsp_status == "Has PCSP"),
 
 
 
-#by tumour type 
-#by stage
+####by tumour type-----------
+site_hna <- patient_level_data %>%
+  filter(keepforhna == "INCLUDE") %>%
+  group_by(ndrs_main, hna_status) %>%
+  summarise(number_patients = n()) %>%
+  ungroup() %>%
+  group_by(ndrs_main) %>%
+  mutate(percent = (number_patients/sum(number_patients))*100,
+         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
+         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         lower_table = paste0(lower,"%"), 
+         upper_table = paste0(upper, "%")) %>%
+  filter(!is.na(ndrs_main)) %>%
+  ungroup() 
+
+site_pcsp <- patient_level_data %>%
+  filter(keepforpcsp == "INCLUDE") %>%
+  group_by(ndrs_main, pcsp_status) %>%
+  summarise(number_patients = n()) %>%
+  ungroup() %>%
+  group_by(ndrs_main) %>%
+  mutate(percent = (number_patients/sum(number_patients))*100,
+         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
+         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         lower_table = paste0(lower,"%"), 
+         upper_table = paste0(upper, "%")) %>%
+  filter(!is.na(ndrs_main)) %>%
+  ungroup()
+
+site_hna_graph <- ggplot(filter(site_hna, site_hna$hna_status == "Has HNA"), 
+                        aes(x = ndrs_main, y = percent)) + 
+  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
+  labs(x = "Tumour type", y = "Percentage of patients offered a HNA") + 
+  scale_y_continuous(limits = c(0, 100)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+site_pcsp_graph <- ggplot(filter(site_pcsp, site_pcsp$pcsp_status == "Has PCSP"), 
+                         aes(x = ndrs_main, y = percent)) + 
+  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
+  labs(x = "Tumour type", y = "Percentage of patients offered a PCSP") + 
+  scale_y_continuous(limits = c(0, 100)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+
+#by stage------------
+site_hna <- patient_level_data %>%
+  filter(keepforhna == "INCLUDE") %>%
+  group_by(ndrs_main, hna_status) %>%
+  summarise(number_patients = n()) %>%
+  ungroup() %>%
+  group_by(ndrs_main) %>%
+  mutate(percent = (number_patients/sum(number_patients))*100,
+         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
+         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         lower_table = paste0(lower,"%"), 
+         upper_table = paste0(upper, "%")) %>%
+  filter(!is.na(ndrs_main)) %>%
+  ungroup() 
+
+site_pcsp <- patient_level_data %>%
+  filter(keepforpcsp == "INCLUDE") %>%
+  group_by(ndrs_main, pcsp_status) %>%
+  summarise(number_patients = n()) %>%
+  ungroup() %>%
+  group_by(ndrs_main) %>%
+  mutate(percent = (number_patients/sum(number_patients))*100,
+         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
+         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         lower_table = paste0(lower,"%"), 
+         upper_table = paste0(upper, "%")) %>%
+  filter(!is.na(ndrs_main)) %>%
+  ungroup()
+
+site_hna_graph <- ggplot(filter(site_hna, site_hna$hna_status == "Has HNA"), 
+                         aes(x = ndrs_main, y = percent)) + 
+  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
+  labs(x = "Tumour type", y = "Percentage of patients offered a HNA") + 
+  scale_y_continuous(limits = c(0, 100)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+site_pcsp_graph <- ggplot(filter(site_pcsp, site_pcsp$pcsp_status == "Has PCSP"), 
+                          aes(x = ndrs_main, y = percent)) + 
+  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
+  labs(x = "Tumour type", y = "Percentage of patients offered a PCSP") + 
+  scale_y_continuous(limits = c(0, 100)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust=1))

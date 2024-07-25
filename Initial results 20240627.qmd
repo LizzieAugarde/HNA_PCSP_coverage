@@ -68,14 +68,14 @@ Excluding those recorded as 'not offered', the status codes recorded against HNA
 
 ```{r offered_code_table, out.width='100%', fig.align='center'}
 
-offered_code_data <- offered_code_data %>%
-  select(-count, -total_count, -percent_graph) %>%
-  pivot_wider(., names_from = event_type, values_from = percent) %>%
-  mutate(HNA = ifelse(is.na(HNA), "-", HNA)) %>%
+offered_code_data <- offered_code_data |>
+  select(-count, -total_count, -percent_graph) |>
+  pivot_wider(., names_from = event_type, values_from = percent) |>
+  mutate(HNA = ifelse(is.na(HNA), "-", HNA)) |>
   rename("Status" = "offered_code")
 
-kable(offered_code_data, align = "lccc") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") %>%
+kable(offered_code_data, align = "lccc") |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") |>
   add_header_above(c(" " = 1, "Proportion of patients" = 2))
   
 ```
@@ -94,14 +94,14 @@ Some patients have more than one HNA/PCSP:
 
 count_summary_table <- left_join(hna_count_summary, pcsp_count_summary, by = c("hna_count" = "pcsp_count"))
 
-count_summary_table <- count_summary_table %>%
-  rename("Number of unique HNA/PCSP records" = "hna_count") %>%
-  rename("HNAs" = "percent_patients_hna") %>%
-  rename("PCSPs" = "percent_patients_pcsp") %>%
+count_summary_table <- count_summary_table |>
+  rename("Number of unique HNA/PCSP records" = "hna_count") |>
+  rename("HNAs" = "percent_patients_hna") |>
+  rename("PCSPs" = "percent_patients_pcsp") |>
   select(-c(number_patients_hna, number_patients_pcsp)) 
 
-kable(count_summary_table, align = "c") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") %>%
+kable(count_summary_table, align = "c") |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") |>
   add_header_above(c(" " = 1, "Proportion of patients" = 2))
   
 ```
@@ -115,7 +115,7 @@ After excluding the non-submitting Trusts from the data, there were `r scales::c
 kable(cosd_completeness, align = "llcc", col.names = c("Quality measure", 
                                                      "Type of event", 
                                                      "Number of unique records", 
-                                                     "Percentage of unique records")) %>%
+                                                     "Percentage of unique records")) |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
   
   
@@ -141,13 +141,13 @@ Of those unique HNA/PCSP records (other than those which were 'Not offered') wit
 
 ```{r point_in_pathway, out.width='100%', fig.align='center'}
 
-pathway_data <- pathway_data %>%
-  select(-count, -total_count, -percent_graph) %>%
+pathway_data <- pathway_data |>
+  select(-count, -total_count, -percent_graph) |>
   pivot_wider(., names_from = "event_type", values_from = "percent") 
 
 kable(pathway_data, align = "lcc", col.names = c("Point in pathway", 
                                                  "Proportion of HNAs", 
-                                                 "Proportion of PCSPs")) %>%
+                                                 "Proportion of PCSPs")) |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
 pathway_graph
@@ -160,13 +160,13 @@ Of those unique HNA/PCSP records (other than those which were 'Not offered') wit
 
 ```{r staff_roles, out.width='100%', fig.align='center'}
 
-staff_role_data <- staff_role_data %>%
-  select(-count, -total_count, -percent_graph) %>%
+staff_role_data <- staff_role_data |>
+  select(-count, -total_count, -percent_graph) |>
   pivot_wider(., names_from = "event_type", values_from = "percent") 
 
 kable(staff_role_data, align = "lcc", col.names = c("Staff role", 
                                                     "Proportion of HNAs", 
-                                                    "Proportion of PCSPs")) %>%
+                                                    "Proportion of PCSPs")) |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
 staff_role_graph
@@ -175,18 +175,22 @@ staff_role_graph
 
 ## Inequalities
 
+The following slides show the proportion of patients with at least one HNA and PCSP recorded in the 2 years following diagnosis, by demographic and clinical characteristics. 
+
+## Gender
+
 ```{r gender, out.width='100%', fig.align='center'}
 
-gender_hna %>% select(-lower, -upper, -percent) %>%
+gender_hna |> select(-lower, -upper, -percent) |>
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Gender", "HNA status", "Number of patients", "Proportion of patients", 
-                      "Lower 95% confidence limit", "Upper 95% confidence limit")) %>%
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
-gender_pcsp %>% select(-lower, -upper, -percent) %>%
+gender_pcsp |> select(-lower, -upper, -percent) |>
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Gender", "PCSP status", "Number of patients", "Proportion of patients", 
-                      "Lower 95% confidence limit", "Upper 95% confidence limit")) %>%
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
 
@@ -194,18 +198,20 @@ grid.arrange(gender_hna_graph, gender_pcsp_graph, ncol=2)
 
 ```
 
+## Age 
+
 ```{r age, out.width='100%'}
 
-age_hna %>% select(-lower, -upper, -percent) %>%
+age_hna |> select(-lower, -upper, -percent) |>
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Age group", "HNA status", "Number of patients", "Proportion of patients", 
-                      "Lower 95% confidence limit", "Upper 95% confidence limit")) %>%
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
-age_pcsp %>% select(-lower, -upper, -percent) %>%
+age_pcsp |> select(-lower, -upper, -percent) |>
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Age group", "PCSP status", "Number of patients", "Proportion of patients", 
-                      "Lower 95% confidence limit", "Upper 95% confidence limit")) %>%
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
 
@@ -213,23 +219,47 @@ grid.arrange(age_hna_graph, age_pcsp_graph, ncol=2)
 
 ```
 
+## Ethnicity
+
 ```{r ethnicity, out.width='100%', fig.align='center'}
 
-ethnicity_hna %>% select(-lower, -upper, -percent) %>%
+ethnicity_hna |> select(-lower, -upper, -percent) |>
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Age group", "HNA status", "Number of patients", "Proportion of patients", 
-                      "Lower 95% confidence limit", "Upper 95% confidence limit")) %>%
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
-ethnicity_pcsp %>% select(-lower, -upper, -percent) %>%
+ethnicity_pcsp |> select(-lower, -upper, -percent) |>
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Age group", "PCSP status", "Number of patients", "Proportion of patients", 
-                      "Lower 95% confidence limit", "Upper 95% confidence limit")) %>%
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
 
 grid.arrange(ethnicity_hna_graph, ethnicity_pcsp_graph, ncol=2)
 
 ```
+## Deprivation
 
+```{r imd, out.width='100%', fig.align='center'}
+
+imd_hna |> select(-lower, -upper, -percent) |>
+  kable(format.args = list(big.mark = ","), align = "llcccc", 
+        col.names = c("Deprivation decile", "HNA status", "Number of patients", "Proportion of patients", 
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+
+imd_pcsp |> select(-lower, -upper, -percent) |>
+  kable(format.args = list(big.mark = ","), align = "llcccc", 
+        col.names = c("Deprivation decile", "PCSP status", "Number of patients", "Proportion of patients", 
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+
+
+grid.arrange(imd_hna_graph, imd_pcsp_graph, ncol=2)
+
+```
+## Tumour type 
+## Stage at diagnosis
 ## Geographic variation
+#do this as a map

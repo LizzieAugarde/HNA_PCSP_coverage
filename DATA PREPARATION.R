@@ -23,7 +23,7 @@ query <- "select * from (
   select pat.patientid,
   tum.tumourid,
   tum.diagnosisdatebest,
-  tum.SITE_ICD10R4_O2_FROM2013,
+  tum.site_icd10r4_o2_3char_from2013,
   tum.stage_pi_detail,
   tum.stage_best_system,
   tum.stage_best,
@@ -63,6 +63,7 @@ query <- "select * from (
   rp.nhsnumber as rp_nhsnumber,
   rp.patientid as rp_patientid,       
   tum.tumourid,
+  tum.diagnosisdatebest,
   rp.event_type,
   rp.event_property_1,
   rp.event_property_2,
@@ -107,23 +108,23 @@ source("stage_functions_tidy.R")
 
 #trans patient fix from 02_data_tidying_tidy.R received from Chloe Bright
 raw_hna_pcsp_data <- raw_hna_pcsp_data %>% mutate(
-  STAGE_PI_DETAIL = if_else(
+  stage_pi_detail = if_else(
     condition = (
       (
-        (GENDER == 2 & SITE_ICD10R4_O2_3CHAR_FROM2013 %in% c("C60", "C61", "C62", "C63")) |
-          (GENDER == 1 & SITE_ICD10R4_O2_3CHAR_FROM2013 %in% c("C51", "C52", "C53", "C54", "C55", "C56", "C57", "C58"))
+        (gender == 2 & site_icd10r4_o2_3char_from2013 %in% c("C60", "C61", "C62", "C63")) |
+          (gender == 1 & site_icd10r4_o2_3char_from2013 %in% c("C51", "C52", "C53", "C54", "C55", "C56", "C57", "C58"))
       ) &
-        !(STAGE_BEST == "?" | is.na(STAGE_BEST))
+        !(stage_best == "?" | is.na(stage_best))
     ),
     true = "Y",
-    false = STAGE_PI_DETAIL
+    false = stage_pi_detail
   )
 )
 
 raw_hna_pcsp_data <- stage_table(raw_hna_pcsp_data) 
 
 raw_hna_pcsp_data <- raw_hna_pcsp_data |>
-  select(-c(STAGE_BEST_SYSTEM, STAGE_PI_DETAIL, SITE_ICD10R4_O2_3CHAR_FROM2013))
+  select(-c(stage_best_system, stage_pi_detail, site_icd10r4_o2_3char_from2013))
 
 
 #count of all HNA and PCSP records 
