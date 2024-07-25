@@ -19,7 +19,8 @@ offered_code_data <- hna_pcsp_data %>%
   summarise(count = n()) %>%
   group_by(event_type) %>%
   mutate(total_count = sum(count),
-         percent = percent((count/total_count), accuracy = 0.1)) %>%
+         percent = percent((count/total_count), accuracy = 0.1),
+         percent_graph = (count/total_count)*100) %>%
   ungroup() %>%
   mutate(event_type = ifelse(event_type == 20, "HNA", "PCSP"),
          offered_code = case_when(offered_code == "01" ~ "Offered and undecided", 
@@ -37,7 +38,8 @@ staff_role_data <- hna_pcsp_data %>%
   summarise(count = n()) %>%
   group_by(event_type) %>%
   mutate(total_count = sum(count),
-         percent = percent((count/total_count), accuracy = 0.1)) %>%
+         percent = percent((count/total_count), accuracy = 0.1),
+         percent_graph = (count/total_count)*100) %>%
   ungroup() %>%
   mutate(event_type = ifelse(event_type == 20, "HNA", "PCSP"),
          staff_role = case_when(staff_role == "01" ~ "CNS", 
@@ -59,7 +61,8 @@ pathway_data <- hna_pcsp_data %>%
   summarise(count = n()) %>%
   group_by(event_type) %>%
   mutate(total_count = sum(count),
-         percent = percent((count/total_count), accuracy = 0.1)) %>%
+         percent = percent((count/total_count), accuracy = 0.1),
+         percent_graph = (count/total_count)*100) %>%
   ungroup() %>%
   mutate(event_type = ifelse(event_type == 20, "HNA", "PCSP"),
          point_of_pathway = case_when(point_of_pathway == "01" ~ "Initial cancer diagnosis", 
@@ -72,23 +75,32 @@ pathway_data <- hna_pcsp_data %>%
                                       TRUE ~ "Other"))
 
 
-offered_code_graph <- ggplot(offered_code_data, aes(x = offered_code, y = percent, group = event_type)) + 
+offered_code_graph <- ggplot(offered_code_data, aes(x = offered_code, y = percent_graph, group = event_type)) + 
   geom_bar(stat = "identity", position = "dodge", aes(fill = event_type)) + 
   labs(x = "Status", y = "Proportion of events", fill = "") + 
   scale_y_continuous(limits = c(0, 100)) +
-  theme(axis.text.x = element_text(angle = 45, hjust=1))
+  theme(axis.text.x = element_text(angle = 45, hjust=1),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14), 
+        legend.text = element_text(size = 14))
 
-staff_role_graph <- ggplot(staff_role_data, aes(x = staff_role, y = percent, group = event_type)) + 
+staff_role_graph <- ggplot(staff_role_data, aes(x = staff_role, y = percent_graph, group = event_type)) + 
   geom_bar(stat = "identity", position = "dodge", aes(fill = event_type)) + 
   labs(x = "Staff role", y = "Proportion of events", fill = "") + 
   scale_y_continuous(limits = c(0, 100)) +
-  theme(axis.text.x = element_text(angle = 45, hjust=1))
+  theme(axis.text.x = element_text(angle = 45, hjust=1),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14), 
+        legend.text = element_text(size = 14))
 
-pathway_graph <- ggplot(pathway_data, aes(x = point_of_pathway, y = percent, group = event_type)) + 
+pathway_graph <- ggplot(pathway_data, aes(x = point_of_pathway, y = percent_graph, group = event_type)) + 
   geom_bar(stat = "identity", position = "dodge", aes(fill = event_type)) + 
   labs(x = "Point of pathway", y = "Proportion of events", fill = "") + 
   scale_y_continuous(limits = c(0, 100)) +
-  theme(axis.text.x = element_text(angle = 45, hjust=1))
+  theme(axis.text.x = element_text(angle = 45, hjust=1),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14), 
+        legend.text = element_text(size = 14))
 
 
 
