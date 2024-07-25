@@ -53,18 +53,16 @@ gender_hna_graph <- ggplot(filter(gender_hna, gender_hna$hna_status == "Has HNA"
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Gender", y = "Percentage of patients offered a HNA") + 
   scale_y_continuous(limits = c(0, 100)) +
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
-
-ggsave("N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/Graphs/Gender_HNA.png")
 
 gender_pcsp_graph <- ggplot(filter(gender_pcsp, gender_pcsp$pcsp_status == "Has PCSP"), aes(x = gender, y = percent)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Gender", y = "Percentage of patients offered a PCSP") + 
   scale_y_continuous(limits = c(0, 100)) +
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
-
-ggsave("N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/Graphs/Gender_PCSP.png")
 
 
 ####by age at diag-------------------
@@ -117,9 +115,8 @@ age_hna_graph <- ggplot(filter(age_hna, age_hna$hna_status == "Has HNA"),
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Age at diagnosis", y = "Percentage of patients offered a HNA") + 
   scale_y_continuous(limits = c(0, 100)) +
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
-
-ggsave("N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/Graphs/Age_HNA.png")
 
 age_pcsp_graph <- ggplot(filter(age_pcsp, age_pcsp$pcsp_status == "Has PCSP"),
        aes(x = factor(age_group, levels = c("Under 20", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+")),
@@ -128,9 +125,8 @@ age_pcsp_graph <- ggplot(filter(age_pcsp, age_pcsp$pcsp_status == "Has PCSP"),
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Age at diagnosis", y = "Percentage of patients offered a PCSP") + 
   scale_y_continuous(limits = c(0, 100)) +
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
-
-ggsave("N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/Graphs/Age_PCSP.png")
 
 
 ####by ethnicity-------------------
@@ -181,6 +177,7 @@ ethnicity_hna_graph <- ggplot(filter(ethnicity_hna, ethnicity_hna$hna_status == 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Ethnicity", y = "Percentage of patients offered a HNA") + 
   scale_y_continuous(limits = c(0, 100)) +
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 ethnicity_pcsp_graph <- ggplot(filter(ethnicity_pcsp, ethnicity_pcsp$pcsp_status == "Has PCSP"), 
@@ -189,12 +186,62 @@ ethnicity_pcsp_graph <- ggplot(filter(ethnicity_pcsp, ethnicity_pcsp$pcsp_status
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Ethnicity", y = "Percentage of patients offered a PCSP") + 
   scale_y_continuous(limits = c(0, 100)) +
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
-#by stage
-patient_level_data <- patient_level_data %>%
-  mutate(stage_group = case_when(stage_best %in% c("A", "B", "C") ~ "White",
-                                 , TRUE ~ "Unknown"))
+
+####by deprivation-------------------
+imd_hna <- patient_level_data %>%
+  filter(keepforhna == "INCLUDE") %>%
+  group_by(imd19_decile_lsoas, hna_status) %>%
+  summarise(number_patients = n()) %>%
+  ungroup() %>%
+  group_by(imd19_decile_lsoas) %>%
+  mutate(percent = (number_patients/sum(number_patients))*100,
+         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
+         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         lower_table = paste0(lower,"%"), 
+         upper_table = paste0(upper, "%")) %>%
+  filter(!is.na(imd19_decile_lsoas)) %>%
+  ungroup() 
+
+imd_pcsp <- patient_level_data %>%
+  filter(keepforpcsp == "INCLUDE") %>%
+  group_by(imd19_decile_lsoas, pcsp_status) %>%
+  summarise(number_patients = n()) %>%
+  ungroup() %>%
+  group_by(imd19_decile_lsoas) %>%
+  mutate(percent = (number_patients/sum(number_patients))*100,
+         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
+         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         lower_table = paste0(lower,"%"), 
+         upper_table = paste0(upper, "%")) %>%
+  filter(!is.na(imd19_decile_lsoas)) %>%
+  ungroup()
+
+imd_hna_graph <- ggplot(filter(imd_hna, imd_hna$hna_status == "Has HNA"), 
+                              aes(x = imd19_decile_lsoas, y = percent)) + 
+  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
+  labs(x = "Deprivation decile", y = "Percentage of patients offered a HNA") + 
+  scale_y_continuous(limits = c(0, 100)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+imd_pcsp_graph <- ggplot(filter(imd_pcsp, imd_pcsp$pcsp_status == "Has PCSP"), 
+                               aes(x = imd19_decile_lsoas, y = percent)) + 
+  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
+  labs(x = "Deprivation decile", y = "Percentage of patients offered a PCSP") + 
+  scale_y_continuous(limits = c(0, 100)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+
 
 #by tumour type 
-#by IMD #####need to add IMD into the main data frame via SQL query column selection
+#by stage
