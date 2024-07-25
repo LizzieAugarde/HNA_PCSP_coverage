@@ -1,0 +1,58 @@
+.reveal .slides h1 {
+	font-size: 32px !important; 
+	font-family: Arial !important; 
+	font-weight: bold !important; 
+}
+
+.reveal .slides h2 {
+	font-size: 20px !important; 
+	font-family: Arial !important;
+	font-weight: bold !important;
+}
+
+.reveal p {
+	font-size: 14px;
+	font-family: Arial;
+}
+
+.reveal thead {
+	font-weight: bold;
+}
+
+/* Overall slide formatting */
+.reveal .slides {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.reveal .slide-content {
+  width: 100%;
+}
+
+.reveal .slide pre, 
+.reveal .slide code {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Ensure centering and expanding graphs */
+.reveal .slide img {
+  width: 100%;
+  height: auto;
+}
+
+/* Ensure kable tables are centered */
+.reveal table  {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.reveal table, 
+.reveal th, 
+.reveal td {
+  font-family: Arial, sans-serif;
+}

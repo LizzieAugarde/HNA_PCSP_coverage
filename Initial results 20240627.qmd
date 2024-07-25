@@ -1,7 +1,18 @@
 ---
 title: "Coverage of holistic needs assessments and personalised care and support plans - England diagnoses in 2021"
-format: revealjs
+format: 
+  revealjs:
+    smaller: true
+    scrollable: true
+    footer: "For internal use only"
+    logo: "Logo.png"
+    width: 1000
+    css: styles.css
 editor: visual
+execute:
+  echo: false
+  warning: false
+  ####do a css styles file
 embed-resources: true
 ---
 
@@ -14,59 +25,72 @@ library(tidyverse)
 load("All_data.RData")
 ```
 
-## Methods
+## Background
+
+Personalised care and support planning is a process to ensure patients’ physical, practical, emotional and social needs are identified and supported. Guidance on using holistic needs assessment (HNA) to deliver personalised care was first published in 2007 and since then HNAs have been rolled out in the NHS for patients diagnosed with cancer (1-3). The NHS Long Term Plan states that “where appropriate every person diagnosed with cancer will have access to personalised care, including needs assessment, a care plan and health and wellbeing information and support” (4). 
+
+HNAs use a structured questionnaire approach to gather information about patients’ physical, social, emotional and financial needs, as well as their psychological and spiritual wellbeing (1-3). HNAs are delivered using a range of tools including the Macmillan eHNA system (2, 3) and are used to identify patients’ concerns and develop a Personalised Care and Support Plan (PCSP) (2, 3).
+
+Since 2020 and the launch of COSD v9.0, more information on HNAs and PCSPs delivered at all NHS Trusts has been collected. NHS organisations are required to report data on the offer of at least one HNA for every patient diagnosed with cancer, using four data items: assessment offered, assessment completed date, assessment point of pathway, and staff role carrying out the assessment. In May 2021, this was expanded to mandate recording of the same data for PCSPs. Unlike the Macmillan eHNA data, these fields do not provide information on the needs that patients highlighted as part of the assessment, however they could still provide useful insights into the characteristics of those who are offered and who complete HNAs and PCSPs. Most NHS Trusts are now submitting HNA and PCSP data, meaning we can begin to explore the delivery of HNAs and PCSPs. 
+
+There is currently some research exploring the efficacy of HNAs, methods for using them to effectively capture patient concerns, and the mechanisms by which assessments might influence self-advocacy (5-8). However, there is minimal evidence about inequalities in the delivery of HNAs, PCSPs, and personalised care more generally. Understanding the coverage of HNAs and PCSPs will help to evaluate the delivery of personalised care for people living with cancer and inform the provision of better personalised care across the NHS. Macmillan are interested in understanding the coverage of HNAs to inform their delivery of the Macmillan eHNA platform and wider activity in personalised care.
+
+# Methods 
+
+Data on HNAs and PCSPs submitted to COSD with an associated date are available in the Rapid Cancer Registration Dataset (RCRD). RCRD can be linked on NHS number to patient diagnosis records. 
+
+Data on patients diagnosed in 2021 with a malignant cancer (C00-C97 excluding C44) were extracted from the registry. Patients diagnosed aged under 18 and with a stage 0 tumour were excluded from the analysis. Also excluded were death certificate only diagnoses, and patients who were diagnosed and died on the same day. There was a small number of patients with a death date recorded before their diagnosis date, who were also excluded. 
+
+Unique HNA and PCSP records associated with these patients were extracted from RCRD. All HNAs and PCSPs occurring within 2 years of the patient's diagnosis date were assessed and the earliest HNA record identified for each patient. 
 
 ```{r overall_figures}
-percent_unique_all <- (unique_hnas_pcsps/all_records)*100
-percent_dups_all <- 100-percent_unique_all
-percent_pts_with_hna <- (pts_with_hna/hnas_denom_size)*100
-percent_pts_with_pcsp <- (pts_with_pcsp/pcsps_denom_size)*100
-percent_only_hna <- (only_hna/ids_either)*100
-percent_only_pcsp <- (only_pcsp/ids_either)*100
-percent_both <- (both/ids_either)*100
-percent_notreqpcsps <- (pcsps_notreq/unique_off_pcsps)*100
+percent_unique_all <- (unique_hnas_pcsps/all_records)
+percent_dups_all <- 1-percent_unique_all
+percent_pts_with_hna <- (pts_with_hna/hnas_denom_size)
+percent_pts_with_pcsp <- (pts_with_pcsp/pcsps_denom_size)
+percent_only_hna <- (only_hna/ids_either)
+percent_only_pcsp <- (only_pcsp/ids_either)
+percent_both <- (both/ids_either)
+percent_notreqpcsps <- (pcsps_notreq/unique_off_pcsps)
 ```
 
 ## Overall
 
-There were `r all_records` of a HNA or PCSP in the RCRD table associated with someone diagnosed in 2021, occurring within 2 years of diagnosis. Of these, `r percent_unique_all`% (`r unique_hnas_pcsps`) were unique records, meaning `r percent_dups_all`% were duplicates. This is believed to be primarily because of the way COSD data is submitted by Trusts. Each time something changes in a patient's record, the entire COSD record is resubmitted, meaning a duplicate of any previous HNAs and PCSPs will be created. 
+There were `r scales::comma(all_records)` of a HNA or PCSP in the RCRD table associated with someone diagnosed in 2021, occurring within 2 years of diagnosis. Of these, `r scales::percent(percent_unique_all, accuracy = 0.01)`% (`r scales::comma(unique_hnas_pcsps)`) were unique records, meaning `r scales::percent(percent_dups_all, accuracy = 0.01)`% were duplicates. This is believed to be primarily because of the way COSD data is submitted by Trusts. Each time something changes in a patient's record, the entire COSD record is resubmitted, meaning a duplicate of any previous HNAs and PCSPs will be created.
 
-There were `r unique_hnas` unique HNAs recorded for patients diagnosed in 2021 and `r unique_pcsps` unique PCSPs.
+There were `r scales::comma(unique_hnas)` unique HNAs recorded for patients diagnosed in 2021 and `r scales::comma(unique_pcsps)` unique PCSPs.
 
-`r hnas_notoff` unique HNAs and `r pcsps_notoff` unique PCSPs were recorded as 'not offered', meaning there were `r unique_off_hnas` unique HNAs and `r unique_off_pcsps` unique PCSPs which were offered to patients diagnosed in 2021 within 2 years of their diagnosis. This includes `r pcsps_notreq` recorded as 'not required (no concerns from HNA)'. 
+`r scales::comma(hnas_notoff)` unique HNAs and `r scales::comma(pcsps_notoff)` unique PCSPs were recorded as 'not offered', meaning there were `r scales::comma(unique_off_hnas)` unique HNAs and `r scales::comma(unique_off_pcsps)` unique PCSPs which were offered to patients diagnosed in 2021 within 2 years of their diagnosis. This includes `r scales::comma(pcsps_notreq)` recorded as 'not required (no concerns from HNA)'.
 
-#Status:
+## Status 
+
 Excluding those recorded as 'not offered', the status codes recorded against HNAs and PCSPs are as follows:
 
-```{r number_records_table}
+```{r offered_code_table, out.width='100%', fig.align='center'}
 
 offered_code_data <- offered_code_data %>%
-  select(-count, -total_count) %>%
+  select(-count, -total_count, -percent_graph) %>%
   pivot_wider(., names_from = event_type, values_from = percent) %>%
   mutate(HNA = ifelse(is.na(HNA), "-", HNA)) %>%
   rename("Status" = "offered_code")
 
-kable(offered_code_data, align = "c") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 10) %>%
+kable(offered_code_data, align = "lccc") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") %>%
   add_header_above(c(" " = 1, "Proportion of patients" = 2))
   
 ```
 
-#Patients:
-The initial denominator, using the approach described above, was `r denom_size` patients, compared to 329,665 reported in the national statistics for 2021. Some Trusts are not submitting HNA/PCSP data to COSD, meaning patients diagnosed at these Trusts should be excluded from coverage analysis. Trusts with fewer than 20 HNAs/PCSPs recorded were excluded. This left a denominator of `r hnas_denom_size` patients for HNAs and `r pcsps_denom_size` patients for PCSPs.
+## Patients: 
 
-Of these:
--   `r percent_pts_with_hna`% of patients had at least one record of being offered a HNA within 2 years of diagnosis (`r pts_with_hna` patients)
--   `r percent_pts_with_pcsp`% of patients had at least one record of being offered a PCSP (or a PCSP being deemed 'not required') within 2 years of diagnosis (`r pts_with_pcsp` patients)
+The initial denominator, using the approach described above, was `r scales::comma(denom_size)` patients, compared to 329,665 reported in the national statistics for 2021. Some Trusts are not submitting HNA/PCSP data to COSD, meaning patients diagnosed at these Trusts should be excluded from coverage analysis. Trusts with fewer than 20 HNAs/PCSPs recorded were excluded. This left a denominator of `r scales::comma(hnas_denom_size)` patients for HNAs and `r scales::comma(pcsps_denom_size)` patients for PCSPs.
 
-Of the patients who had at least one record of either a HNA or PCSP (`r ids_either`):
-- `r percent_only_hna`% had only a HNA recorded (`r only_hna`)
-- `r percent_only_pcsp`% had only a PCSP recorded (`r only_pcsp`)
-- `r percent_both`% had both a HNA and PCSP recorded (`r both`)
+Of these: - `r scales::percent(percent_pts_with_hna, accuracy = 0.01)`% of patients had at least one record of being offered a HNA within 2 years of diagnosis (`r scales::comma(pts_with_hna)` patients) - `r scales::percent(percent_pts_with_pcsp, accuracy = 0.01)`% of patients had at least one record of being offered a PCSP (or a PCSP being deemed 'not required') within 2 years of diagnosis (`r scales::comma(pts_with_pcsp)` patients)
+
+Of the patients who had at least one record of either a HNA or PCSP (`r scales::comma(ids_either)`): - `r scales::percent(percent_only_hna, accuracy = 0.01)`% had only a HNA recorded (`r scales::comma(only_hna)`) - `r scales::percent(percent_only_pcsp, accuracy = 0.01)`% had only a PCSP recorded (`r scales::comma(only_pcsp)`) - `r scales::percent(percent_both, accuracy = 0.01)`% had both a HNA and PCSP recorded (`r scales::comma(both)`)
 
 Some patients have more than one HNA/PCSP:
 
-```{r number_records_table}
+```{r number_records_table, out.width='100%', fig.align='center'}
 
 count_summary_table <- left_join(hna_count_summary, pcsp_count_summary, by = c("hna_count" = "pcsp_count"))
 
@@ -77,42 +101,54 @@ count_summary_table <- count_summary_table %>%
   select(-c(number_patients_hna, number_patients_pcsp)) 
 
 kable(count_summary_table, align = "c") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 10) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") %>%
   add_header_above(c(" " = 1, "Proportion of patients" = 2))
   
 ```
 
 ## Completeness and quality of COSD data
 
-After excluding the non-submitting Trusts from the data, there were `r unique_hnas` unique HNAs and `r unique_pcsps` unique PCSPs remaining in the dataset. 
+After excluding the non-submitting Trusts from the data, there were `r scales::comma(unique_hnas)` unique HNAs and `r scales::comma(unique_pcsps)` unique PCSPs remaining in the dataset.
 
-```{r completeness_table}
+```{r completeness_table, out.width='100%', fig.align='center'}
 
 kable(cosd_completeness, align = "llcc", col.names = c("Quality measure", 
                                                      "Type of event", 
                                                      "Number of unique records", 
                                                      "Percentage of unique records")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 10) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
   
   
 ```
 
-
 ## Comparison to eHNA data
+
+Data from the eHNA system for assessments marked as "locked" or "submitted", recorded by each NHS Trust, were compared to the number of unique HNAs recorded in RCRD by Trust, in 2021. 
+
+There are significantly more HNAs recorded in the eHNA data in 2021, than in COSD. `r length(not_in_ehna)` Trusts with data in RCRD did not appear in the eHNA data. `r length(not_in_cosd)` Trusts in the eHNA data did not appear in RCRD. Of those Trusts which do appear in both datasets, almost all have more HNAs recorded in eHNA than COSD. 
+
+```{r comparison_table, out.width='100%', fig.align='center'}
+
+differences_graph
+
+```
+
 ## Delivery across the pathway
+
 inc "hnas and pcsps"
 
-Of those unique HNA/PCSP records (other than those which were 'Not offered') with a valid point in pathway code: 
-```{r point_in_pathway}
+Of those unique HNA/PCSP records (other than those which were 'Not offered') with a valid point in pathway code:
+
+```{r point_in_pathway, out.width='100%', fig.align='center'}
 
 pathway_data <- pathway_data %>%
-  select(-count, -total_count) %>%
+  select(-count, -total_count, -percent_graph) %>%
   pivot_wider(., names_from = "event_type", values_from = "percent") 
 
 kable(pathway_data, align = "lcc", col.names = c("Point in pathway", 
                                                  "Proportion of HNAs", 
                                                  "Proportion of PCSPs")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 10) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
 pathway_graph
   
@@ -120,77 +156,80 @@ pathway_graph
 
 ## Staff roles
 
-Of those unique HNA/PCSP records (other than those which were 'Not offered') with a valid staff role code: 
-```{r staff_roles}
+Of those unique HNA/PCSP records (other than those which were 'Not offered') with a valid staff role code:
+
+```{r staff_roles, out.width='100%', fig.align='center'}
 
 staff_role_data <- staff_role_data %>%
-  select(-count, -total_count) %>%
+  select(-count, -total_count, -percent_graph) %>%
   pivot_wider(., names_from = "event_type", values_from = "percent") 
 
 kable(staff_role_data, align = "lcc", col.names = c("Staff role", 
                                                     "Proportion of HNAs", 
                                                     "Proportion of PCSPs")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 10) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
 staff_role_graph
   
 ```
 
 ## Inequalities
-```{r gender}
+
+```{r gender, out.width='100%', fig.align='center'}
 
 gender_hna %>% select(-lower, -upper, -percent) %>%
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Gender", "HNA status", "Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 10) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
 gender_pcsp %>% select(-lower, -upper, -percent) %>%
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Gender", "PCSP status", "Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 10) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
 
 grid.arrange(gender_hna_graph, gender_pcsp_graph, ncol=2)
 
 ```
 
-```{r age}
+```{r age, out.width='100%'}
 
 age_hna %>% select(-lower, -upper, -percent) %>%
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Age group", "HNA status", "Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 10) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
 age_pcsp %>% select(-lower, -upper, -percent) %>%
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Age group", "PCSP status", "Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 10) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
 
 grid.arrange(age_hna_graph, age_pcsp_graph, ncol=2)
 
 ```
 
-```{r ethnicity}
+```{r ethnicity, out.width='100%', fig.align='center'}
 
 ethnicity_hna %>% select(-lower, -upper, -percent) %>%
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Age group", "HNA status", "Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 10) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
 ethnicity_pcsp %>% select(-lower, -upper, -percent) %>%
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Age group", "PCSP status", "Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 10) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
 
 grid.arrange(ethnicity_hna_graph, ethnicity_pcsp_graph, ncol=2)
 
 ```
+
 ## Geographic variation
