@@ -7,6 +7,7 @@
 #Change log:
 #15/03/2024 adjusted approach to counting patients
 #08/04/2024 adjusted query approach
+#25/07/2024 added staging functions and site from AT_SITE_ENGLAND
 ############################################################### 
 
 #prep
@@ -22,21 +23,21 @@ query <- "select * from (
   select pat.patientid,
   tum.tumourid,
   tum.diagnosisdatebest,
-  tum.diagnosisyear,
-  tum.site_icd10_o2_3char,
+  tum.SITE_ICD10R4_O2_FROM2013,
+  tum.stage_pi_detail,
+  tum.stage_best_system,
   tum.stage_best,
   tum.gender,
   tum.age,
   tum.ethnicity,
   tum.deathdatebest,
   tum.diag_trust,
-  geo.lsoa11_code,
-  geo.parl_con_name,
-  geo.utla_2021_name,
   imd.imd19_decile_lsoas,
+  site.ndrs_main,
   rank () over (partition by pat.patientid order by tum.diagnosisdatebest, tum.tumourid asc) as rank
   from av2021.at_patient_england@casref01 pat 
   left join av2021.at_tumour_england@casref01 tum on pat.patientid = tum.patientid
+  left join analysispollyjeffrey.at_site_england@casref01 site on tum.tumourid = site.tumourid --added 25/07/2024
   left join av2021.at_geography_england@casref01 geo on tum.tumourid = geo.tumourid
   left join imd.imd2019_equal_lsoas@casref01 imd on geo.lsoa11_code = imd.lsoa11_code
   where tum.diagnosisyear = 2021
@@ -62,9 +63,6 @@ query <- "select * from (
   rp.nhsnumber as rp_nhsnumber,
   rp.patientid as rp_patientid,       
   tum.tumourid,
-  tum.diagnosisdatebest,
-  tum.diagnosisyear,
-  tum.diag_trust,
   rp.event_type,
   rp.event_property_1,
   rp.event_property_2,
@@ -101,9 +99,34 @@ raw_hna_pcsp_data <- raw_hna_pcsp_data %>%
          pcsp = case_when(event_type == 24 ~ "Y", TRUE ~ "N")) %>%
   
   #joining to patient cohort to get demographic info 
-  left_join(., patient_cohort %>% select(patientid, site_icd10_o2_3char, stage_best, gender, age, ethnicity, deathdatebest, lsoa11_code, imd19_decile_lsoas, parl_con_name), 
-            by = "patientid")
+  left_join(., patient_cohort, by = "patientid")
 
+
+###### RECODING STAGE AND REMOVING STAGE 0 CASES ######
+source("stage_functions_tidy.R")
+
+#trans patient fix from 02_data_tidying_tidy.R received from Chloe Bright
+raw_hna_pcsp_data <- raw_hna_pcsp_data %>% mutate(
+  STAGE_PI_DETAIL = if_else(
+    condition = (
+      (
+        (GENDER == 2 & SITE_ICD10R4_O2_3CHAR_FROM2013 %in% c("C60", "C61", "C62", "C63")) |
+          (GENDER == 1 & SITE_ICD10R4_O2_3CHAR_FROM2013 %in% c("C51", "C52", "C53", "C54", "C55", "C56", "C57", "C58"))
+      ) &
+        !(STAGE_BEST == "?" | is.na(STAGE_BEST))
+    ),
+    true = "Y",
+    false = STAGE_PI_DETAIL
+  )
+)
+
+raw_hna_pcsp_data <- stage_table(raw_hna_pcsp_data) 
+
+raw_hna_pcsp_data <- raw_hna_pcsp_data |>
+  select(-c(STAGE_BEST_SYSTEM, STAGE_PI_DETAIL, SITE_ICD10R4_O2_3CHAR_FROM2013))
+
+
+#count of all HNA and PCSP records 
 all_records <- sum(raw_hna_pcsp_data$hna == "Y" | raw_hna_pcsp_data$pcsp == "Y") #1873053 records of a HNA/PCSP
 
 
