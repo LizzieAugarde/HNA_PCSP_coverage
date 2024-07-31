@@ -69,8 +69,8 @@ Excluding those recorded as 'not offered', the status codes recorded against HNA
 ```{r offered_code_table, out.width='100%', fig.align='center'}
 
 offered_code_data <- offered_code_data |>
-  select(-count, -total_count, -percent_graph) |>
-  pivot_wider(., names_from = event_type, values_from = percent) |>
+  select(-c(count, total_count, percent_graph)) |>
+  pivot_wider(names_from = event_type, values_from = percent) |>
   mutate(HNA = ifelse(is.na(HNA), "-", HNA)) |>
   rename("Status" = "offered_code")
 
@@ -142,8 +142,8 @@ Of those unique HNA/PCSP records (other than those which were 'Not offered') wit
 ```{r point_in_pathway, out.width='100%', fig.align='center'}
 
 pathway_data <- pathway_data |>
-  select(-count, -total_count, -percent_graph) |>
-  pivot_wider(., names_from = "event_type", values_from = "percent") 
+  select(-c(count, total_count, percent_graph)) |>
+  pivot_wider(names_from = "event_type", values_from = "percent") 
 
 kable(pathway_data, align = "lcc", col.names = c("Point in pathway", 
                                                  "Proportion of HNAs", 
@@ -161,8 +161,8 @@ Of those unique HNA/PCSP records (other than those which were 'Not offered') wit
 ```{r staff_roles, out.width='100%', fig.align='center'}
 
 staff_role_data <- staff_role_data |>
-  select(-count, -total_count, -percent_graph) |>
-  pivot_wider(., names_from = "event_type", values_from = "percent") 
+  select(-c(count, total_count, percent_graph)) |>
+  pivot_wider(names_from = "event_type", values_from = "percent") 
 
 kable(staff_role_data, align = "lcc", col.names = c("Staff role", 
                                                     "Proportion of HNAs", 
@@ -243,13 +243,13 @@ grid.arrange(ethnicity_hna_graph, ethnicity_pcsp_graph, ncol=2)
 
 ```{r imd, out.width='100%', fig.align='center'}
 
-imd_hna |> select(-lower, -upper, -percent) |>
+imd_hna |> select(-c(lower, upper, percent)) |>
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Deprivation decile", "HNA status", "Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
 
-imd_pcsp |> select(-lower, -upper, -percent) |>
+imd_pcsp |> select(-c(lower, upper, percent)) |>
   kable(format.args = list(big.mark = ","), align = "llcccc", 
         col.names = c("Deprivation decile", "PCSP status", "Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
@@ -262,4 +262,20 @@ grid.arrange(imd_hna_graph, imd_pcsp_graph, ncol=2)
 ## Tumour type 
 ## Stage at diagnosis
 ## Geographic variation
-#do this as a map
+
+Geographic variation is measured by the trust of diagnosis, which is assumed to be the most likely trust delivering first HNAs and PCSPs. 
+```{r geog, out.width='100%', fig.align='center'}
+
+trust_coverage_hna_cats |> 
+  kable(format.args = list(big.mark = ","), align = "lc", 
+        col.names = c("Proportion of patients offered a HNA", "Number of trusts")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+
+trust_coverage_pcsp_cats |> 
+  kable(format.args = list(big.mark = ","), align = "lc", 
+        col.names = c("Proportion of patients offered a PCSP", "Number of trusts")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+
+grid.arrange(trust_hna_graph, trust_pcsp_graph, ncol=2)
+
+```

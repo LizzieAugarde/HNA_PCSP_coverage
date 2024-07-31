@@ -31,7 +31,8 @@ trust_hna <- patient_level_data |>
 trust_coverage_hna_cats <- trust_hna |> 
   group_by(percent_group) |>
   summarise(trust_count = n()) |>
-  mutate(percent_group = fct_relevel(percent_group, "Less than 10%"))
+  mutate(percent_group = fct_relevel(percent_group, "Less than 10%")) |>
+  arrange(percent_group)
 
 trust_hna_graph <- ggplot(trust_coverage_hna_cats, aes(x = percent_group, y = trust_count)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
@@ -64,7 +65,8 @@ trust_pcsp <- patient_level_data |>
 trust_coverage_pcsp_cats <- trust_pcsp |> 
   group_by(percent_group) |>
   summarise(trust_count = n()) |>
-  mutate(percent_group = fct_relevel(percent_group, "Less than 10%"))
+  mutate(percent_group = fct_relevel(percent_group, "Less than 10%")) |>
+  arrange(percent_group)
 
 trust_pcsp_graph <- ggplot(trust_coverage_pcsp_cats, aes(x = percent_group, y = trust_count)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 

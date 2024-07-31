@@ -199,10 +199,6 @@ only_hna <- length(setdiff(ids_hna, ids_pcsp)) #14484 patients with only an HNA
 only_pcsp <- length(setdiff(ids_pcsp, ids_hna)) #6481 patients with only a PCSP
 both <- length(intersect(ids_hna, ids_pcsp)) #65382 patients with both
 
-#write out record level HNA and PCSP data
-save(hna_data, file = "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA events raw data RCRD 20240717.RData")
-save(pcsp_data, file = "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/PCSP events raw data RCRD 20240717.RData")
-
 
 ###### RANKING BY DATE ######
 rank_by_date <- function(data, pid_col, date_col) {
@@ -216,11 +212,6 @@ hna_data <- rank_by_date(hna_data, patientid, event_date)
 pcsp_data <- rank_by_date(pcsp_data, patientid, event_date)
 
 hna_pcsp_data <- rbind(hna_data, pcsp_data) #this dataset now contains all unique and ranked HNA and PCSP records
-
-#write out record level ranked HNA and PCSP data
-save(hna_data, file = "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA in RCRD ranked by patient 20240717.RData")
-save(pcsp_data, file = "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/PCSPs in RCRD ranked by patient 20240717.RData")
-save(hna_pcsp_data, file = "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/HNA and PCSPs in RCRD ranked by patient 20240717.RData")
 
 
 ####### Patient-level combined dataset - row for each patient with record of earliest HNA and PCSP for each person ######
@@ -281,5 +272,5 @@ patient_level_data <- patient_level_data %>%
          pcsp_status = ifelse(pcsp_count > 0, "Has PCSP", "No PCSP"))
 
 #write out patient-level HNA and PCSP data
-save(patient_level_data, file = "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/Patient-level RCRD HNA and PCSP data 20240717.RData")
+#save(patient_level_data, file = "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/Patient-level RCRD HNA and PCSP data 20240717.RData")
 
