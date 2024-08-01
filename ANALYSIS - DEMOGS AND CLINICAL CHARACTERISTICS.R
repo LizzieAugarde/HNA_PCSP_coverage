@@ -27,7 +27,7 @@ gender_hna <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(gender)) |>
+  filter(!is.na(gender), hna_status == "Has HNA") |>
   mutate(gender = ifelse(gender == "1", "Male", "Female")) |>
   ungroup()
 
@@ -44,22 +44,22 @@ gender_pcsp <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(gender)) |>
+  filter(!is.na(gender), pcsp_status == "Has PCSP") |>
   mutate(gender = ifelse(gender == "1", "Male", "Female")) |>
   ungroup()
 
-gender_hna_graph <- ggplot(filter(gender_hna, gender_hna$hna_status == "Has HNA"), aes(x = gender, y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+gender_hna_graph <- ggplot(gender_hna, aes(x = gender, y = percent)) + 
+  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
-  labs(x = "Gender", y = "Percentage of patients offered a HNA") + 
+  labs(x = "Gender", y = "Proportion of patients offered a HNA") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
-gender_pcsp_graph <- ggplot(filter(gender_pcsp, gender_pcsp$pcsp_status == "Has PCSP"), aes(x = gender, y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+gender_pcsp_graph <- ggplot(gender_pcsp, aes(x = gender, y = percent)) + 
+  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
-  labs(x = "Gender", y = "Percentage of patients offered a PCSP") + 
+  labs(x = "Gender", y = "Proportion of patients offered a PCSP") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
@@ -89,7 +89,7 @@ age_hna <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(age_group)) |>
+  filter(!is.na(age_group), hna_status == "Has HNA") |>
   ungroup() 
 
 age_pcsp <- patient_level_data |>
@@ -105,25 +105,25 @@ age_pcsp <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(age_group)) |>
+  filter(!is.na(age_group), hna_status == "Has PCSP") |>
   ungroup() 
 
-age_hna_graph <- ggplot(filter(age_hna, age_hna$hna_status == "Has HNA"), 
+age_hna_graph <- ggplot(age_hna, 
        aes(x = factor(age_group, levels = c("Under 20", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+")),
            y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
-  labs(x = "Age at diagnosis", y = "Percentage of patients offered a HNA") + 
+  labs(x = "Age at diagnosis", y = "Proportion of patients offered a HNA") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
-age_pcsp_graph <- ggplot(filter(age_pcsp, age_pcsp$pcsp_status == "Has PCSP"),
+age_pcsp_graph <- ggplot(age_pcsp,
        aes(x = factor(age_group, levels = c("Under 20", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+")),
            y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
-  labs(x = "Age at diagnosis", y = "Percentage of patients offered a PCSP") + 
+  labs(x = "Age at diagnosis", y = "Proportion of patients offered a PCSP") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
@@ -152,7 +152,7 @@ ethnicity_hna <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(ethnicity_group)) |>
+  filter(!is.na(ethnicity_group), hna_status == "Has HNA") |>
   ungroup()
 
 ethnicity_pcsp <- patient_level_data |>
@@ -168,14 +168,14 @@ ethnicity_pcsp <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(ethnicity_group)) |>
+  filter(!is.na(ethnicity_group), pcsp_status == "Has PCSP") |>
   ungroup()
 
-ethnicity_hna_graph <- ggplot(filter(ethnicity_hna, ethnicity_hna$hna_status == "Has HNA"), 
+ethnicity_hna_graph <- ggplot(ethnicity_hna, 
                               aes(x = ethnicity_group, y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
-  labs(x = "Ethnicity", y = "Percentage of patients offered a HNA") + 
+  labs(x = "Ethnicity", y = "Proportion of patients offered a HNA") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
@@ -204,7 +204,7 @@ imd_hna <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(imd19_decile_lsoas)) |>
+  filter(!is.na(imd19_decile_lsoas), hna_status == "Has HNA") |>
   ungroup() |>
   mutate(imd19_decile_lsoas = factor(imd19_decile_lsoas, levels = c(
     "1 - most deprived", "2", "3", "4", "5", 
@@ -223,30 +223,29 @@ imd_pcsp <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(imd19_decile_lsoas)) |>
+  filter(!is.na(imd19_decile_lsoas), pcsp_status == "Has PCSP") |>
   ungroup() |>
   mutate(imd19_decile_lsoas = factor(imd19_decile_lsoas, levels = c(
     "1 - most deprived", "2", "3", "4", "5", 
     "6", "7", "8", "9", "10 - least deprived")))
 
-imd_hna_graph <- ggplot(filter(imd_hna, imd_hna$hna_status == "Has HNA"), 
-                              aes(x = imd19_decile_lsoas, y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+imd_hna_graph <- ggplot(imd_hna, 
+                        aes(x = imd19_decile_lsoas, y = percent)) + 
+  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
-  labs(x = "Deprivation decile", y = "Percentage of patients offered a HNA") + 
+  labs(x = "Deprivation decile", y = "Proportion of patients offered a HNA") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
-imd_pcsp_graph <- ggplot(filter(imd_pcsp, imd_pcsp$pcsp_status == "Has PCSP"), 
-                               aes(x = imd19_decile_lsoas, y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+imd_pcsp_graph <- ggplot(imd_pcsp,
+                         aes(x = imd19_decile_lsoas, y = percent)) + 
+  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
-  labs(x = "Deprivation decile", y = "Percentage of patients offered a PCSP") + 
+  labs(x = "Deprivation decile", y = "Proportion of patients offered a PCSP") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
-
 
 
 ####by tumour type-----------
@@ -263,7 +262,7 @@ site_hna <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(ndrs_main)) |>
+  filter(!is.na(ndrs_main), hna_status == "Has HNA") |>
   ungroup() 
 
 site_pcsp <- patient_level_data |>
@@ -279,35 +278,35 @@ site_pcsp <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(ndrs_main)) |>
+  filter(!is.na(ndrs_main), pcsp_status == "Has PCSP") |>
   ungroup()
 
-site_hna_graph <- ggplot(filter(site_hna, site_hna$hna_status == "Has HNA"), 
+site_hna_graph <- ggplot(site_hna, 
                         aes(x = ndrs_main, y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
-  labs(x = "Tumour type", y = "Percentage of patients offered a HNA") + 
+  labs(x = "Tumour type", y = "Proportion of patients offered a HNA") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
-site_pcsp_graph <- ggplot(filter(site_pcsp, site_pcsp$pcsp_status == "Has PCSP"), 
+site_pcsp_graph <- ggplot(site_pcsp, 
                          aes(x = ndrs_main, y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
-  labs(x = "Tumour type", y = "Percentage of patients offered a PCSP") + 
+  labs(x = "Tumour type", y = "Proportion of patients offered a PCSP") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 
 #by stage------------
-site_hna <- patient_level_data |>
+stage_hna <- patient_level_data |>
   filter(keepforhna == "INCLUDE") |>
-  group_by(ndrs_main, hna_status) |>
+  group_by(STAGE, hna_status) |>
   summarise(number_patients = n()) |>
   ungroup() |>
-  group_by(ndrs_main) |>
+  group_by(STAGE) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
          lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
@@ -315,15 +314,15 @@ site_hna <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(ndrs_main)) |>
+  filter(!is.na(STAGE), STAGE != "Error", STAGE != "Missing", hna_status == "Has HNA") |>
   ungroup() 
 
-site_pcsp <- patient_level_data |>
+stage_pcsp <- patient_level_data |>
   filter(keepforpcsp == "INCLUDE") |>
-  group_by(ndrs_main, pcsp_status) |>
+  group_by(STAGE, pcsp_status) |>
   summarise(number_patients = n()) |>
   ungroup() |>
-  group_by(ndrs_main) |>
+  group_by(STAGE) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
          lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
@@ -331,23 +330,23 @@ site_pcsp <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(ndrs_main)) |>
+  filter(!is.na(STAGE), STAGE != "Error", STAGE != "Missing", pcsp_status == "Has PCSP") |>
   ungroup()
 
-site_hna_graph <- ggplot(filter(site_hna, site_hna$hna_status == "Has HNA"), 
-                         aes(x = ndrs_main, y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+stage_hna_graph <- ggplot(stage_hna, 
+                         aes(x = STAGE, y = percent)) + 
+  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
-  labs(x = "Tumour type", y = "Percentage of patients offered a HNA") + 
+  labs(x = "Stage at diagnosis", y = "Proportion of patients offered a HNA") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
-site_pcsp_graph <- ggplot(filter(site_pcsp, site_pcsp$pcsp_status == "Has PCSP"), 
-                          aes(x = ndrs_main, y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+stage_pcsp_graph <- ggplot(stage_pcsp, 
+                          aes(x = STAGE, y = percent)) + 
+  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
-  labs(x = "Tumour type", y = "Percentage of patients offered a PCSP") + 
+  labs(x = "Stage at diagnosis", y = "Proportion of patients offered a PCSP") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))

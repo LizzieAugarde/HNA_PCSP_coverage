@@ -126,7 +126,6 @@ raw_hna_pcsp_data <- stage_table(raw_hna_pcsp_data)
 raw_hna_pcsp_data <- raw_hna_pcsp_data |>
   select(-c(stage_best_system, stage_pi_detail, site_icd10r4_o2_3char_from2013))
 
-
 #count of all HNA and PCSP records 
 all_records <- sum(raw_hna_pcsp_data$hna == "Y" | raw_hna_pcsp_data$pcsp == "Y") #1873053 records of a HNA/PCSP
 
