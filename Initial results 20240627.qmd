@@ -37,26 +37,6 @@ There is currently some research exploring the efficacy of HNAs, methods for usi
 
 ## 2. Methods
 
-Data on HNAs and PCSPs are submitted to the NHS England Cancer Outcomes and Services Dataset (COSD). Those records with an associated date are available in the Rapid Cancer Registration Dataset (RCRD). RCRD can be linked on NHS number to patient diagnosis records.
-
-Patient cohort:
-
-Data on patients diagnosed in 2021 with a malignant cancer (C00-C97 excluding C44) were extracted from the registry. For patients with multiple tumours diagnosed in 2021, their first diagnosed tumour is used. All patients are included, regardless of whether they have any subsequent or previous diagnoses. Patients diagnosed with a stage 0 tumour were excluded from the analysis. Also excluded were death certificate only diagnoses, and patients who were diagnosed and died on the same day. There was a small number of patients with a death date recorded before their diagnosis date, who were also excluded.
-
-Some trusts are not submitting HNA and PCSP data to COSD, meaning patients diagnosed at these trusts were excluded from this analysis. Patients diagnosed at trusts meeting the following criteria were excluded:
-
--   Trusts with fewer than 10 HNA/PCSP records and fewer than 100 patients diagnosed in 2021
-
--   Trusts with fewer than 20 HNA/PCSP records and at least 100 patients diagnosed in 2021
-
-This left a denominator of `r scales::comma(hnas_denom_size)` patients for HNA coverage analysis and `r scales::comma(pcsps_denom_size)` for PCSP coverage analysis, compared to 329,665 patients diagnosed in 2021 recorded in national statistics.
-
-HNA and PCSP records:
-
-HNA and PCSP records in RCRD were linked to the patient cohort on NHS number. There were `r scales::comma(all_records)` of a HNA or PCSP in the RCRD table associated with someone diagnosed in 2021, occurring within 2 years of diagnosis. Of these, `r scales::percent(percent_unique_all, accuracy = 0.01)`% (`r scales::comma(unique_hnas_pcsps)`) were unique records, meaning `r scales::percent(percent_dups_all, accuracy = 0.01)`% were duplicates. This is believed to be primarily because of the way COSD data is submitted by Trusts. Each time something changes in a patient's record, the entire COSD record is resubmitted, meaning a duplicate of any previous HNAs and PCSPs will be created.
-
-Duplicates were removed and unique HNA and PCSP records associated with each patients were linked to the patient cohort. All HNAs and PCSPs occurring within 2 years of the patient's diagnosis date were assessed and the earliest HNA record identified for each patient. The analysis primarily explores the first HNA and PCSP for each patient.
-
 ```{r overall_figures}
 percent_unique_all <- (unique_hnas_pcsps/all_records)
 percent_dups_all <- 1-percent_unique_all
@@ -68,24 +48,43 @@ percent_both <- (both/ids_either)
 percent_notreqpcsps <- (pcsps_notreq/unique_off_pcsps)
 ```
 
+Data on HNAs and PCSPs are submitted to the NHS England Cancer Outcomes and Services Dataset (COSD). Those records with an associated date are available in the Rapid Cancer Registration Dataset (RCRD). RCRD can be linked on NHS number to patient diagnosis records. <br> <br> Patient cohort:
+
+Data on patients diagnosed in 2021 with a malignant cancer (C00-C97 excluding C44) were extracted from the registry. For patients with multiple tumours diagnosed in 2021, their first diagnosed tumour is used. All patients are included, regardless of whether they have any subsequent or previous diagnoses. Patients diagnosed with a stage 0 tumour were excluded from the analysis. Also excluded were death certificate only diagnoses, and patients who were diagnosed and died on the same day. There was a small number of patients with a death date recorded before their diagnosis date, who were also excluded.
+
+Some trusts are not submitting HNA and PCSP data to COSD, meaning patients diagnosed at these trusts were excluded from this analysis. Patients diagnosed at trusts meeting the following criteria were excluded:
+
+-   Trusts with fewer than 10 HNA/PCSP records and fewer than 100 patients diagnosed in 2021
+
+-   Trusts with fewer than 20 HNA/PCSP records and at least 100 patients diagnosed in 2021
+
+This left a denominator of `r scales::comma(hnas_denom_size)` patients for HNA coverage analysis and `r scales::comma(pcsps_denom_size)` for PCSP coverage analysis, compared to 329,665 patients diagnosed in 2021 recorded in national statistics.
+
+\
+HNA and PCSP records:
+
+HNA and PCSP records in RCRD were linked to the patient cohort on NHS number. There were `r scales::comma(all_records)` of a HNA or PCSP in the RCRD Figure associated with someone diagnosed in 2021, occurring within 2 years of diagnosis. Of these, `r scales::percent(percent_unique_all, accuracy = 0.1)`% (`r scales::comma(unique_hnas_pcsps)`) were unique records, meaning `r scales::percent(percent_dups_all, accuracy = 0.1)`% were duplicates. This is believed to be primarily because of the way COSD data is submitted by Trusts. Each time something changes in a patient's record, the entire COSD record is resubmitted, meaning a duplicate of any previous HNAs and PCSPs will be created.
+
+Duplicates were removed and unique HNA and PCSP records associated with each patients were linked to the patient cohort. All HNAs and PCSPs occurring within 2 years of the patient's diagnosis date were assessed and the earliest HNA record identified for each patient. The analysis primarily explores the first HNA and PCSP for each patient.
+
 ## 3. Status of HNA and PCSP records
 
 There were `r scales::comma(unique_hnas)` unique HNAs recorded for patients diagnosed in 2021 and `r scales::comma(unique_pcsps)` unique PCSPs.
 
 `r scales::comma(hnas_notoff)` unique HNAs and `r scales::comma(pcsps_notoff)` unique PCSPs were recorded as 'not offered', meaning there were `r scales::comma(unique_off_hnas)` unique HNAs and `r scales::comma(unique_off_pcsps)` unique PCSPs which were offered to patients diagnosed in 2021 within 2 years of their diagnosis. This includes `r scales::comma(pcsps_notreq)` recorded as 'not required (no concerns from HNA)'.
 
-###### Table 3a: Number and proportion of HNA and PCSP records with each status code, all unique records for patients diagnosed in 2021, excluding those recorded as 'not offered'
+###### Figure 3a: Number and proportion of HNA and PCSP records with each status code, all unique records for patients diagnosed in 2021, excluding those recorded as 'not offered'
 
-```{r offered_code_table, out.width='100%', fig.align='center'}
+```{r offered_code_Figure, out.width='100%', fig.align='center'}
 
 offered_code_data <- offered_code_data |>
-  select(-c(count, total_count, percent_graph)) |>
-  pivot_wider(names_from = event_type, values_from = percent) |>
+  select(event_type, offered_code, percent) |>
+  pivot_wider(names_from = "event_type", values_from = "percent") |>
   mutate(HNA = ifelse(is.na(HNA), "-", HNA)) |>
   rename("Status" = "offered_code")
 
-kable(offered_code_data, align = "lccc") |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") |>
+kable(offered_code_data, align = "lcc") |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") |>
   add_header_above(c(" " = 1, "Proportion of records" = 2))
   
 ```
@@ -94,13 +93,13 @@ kable(offered_code_data, align = "lccc") |>
 
 After excluding the non-submitting Trusts from the data, there were `r scales::comma(unique_hnas)` unique HNAs and `r scales::comma(unique_pcsps)` unique PCSPs remaining in the dataset.
 
-COSD HNA and PCSP data includes variables for the 'point in pathway' when the HNA/PCSP was delivered, and the staff role of the person delivering the HNA/PCSP. There is some missing data in these fields (Table 4a). Some records are also recorded as having occurred on dates after the patient's recorded date of death (Table 4a).
+COSD HNA and PCSP data includes variables for the 'point in pathway' when the HNA/PCSP was delivered, and the staff role of the person delivering the HNA/PCSP. There is some missing data in these fields (Figure 4a). Some records are also recorded as having occurred on dates after the patient's recorded date of death (Figure 4a).
 
-###### Table 4a: Number and proportion of HNA and PCSP records with each quality measure characteristic, all unique records for patients diagnosed in 2021
+###### Figure 4a: Number and proportion of HNA and PCSP records with each quality measure characteristic, all unique records for patients diagnosed in 2021
 
-```{r completeness_table, out.width='100%', fig.align='center'}
+```{r completeness_Figure, out.width='100%', fig.align='center'}
 
-kable(cosd_completeness, align = "lccc", col.names = c("Quality measure",                                                       "Type of event",                                                       "Number of records",                                                       "Proportion of records"), format.args = list(big.mark = ",")) |>   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center")
+kable(cosd_completeness, align = "lccc", col.names = c("Quality measure",                                                       "Type of event",                                                       "Number of records",                                                       "Proportion of records"), format.args = list(big.mark = ",")) |>   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center")
 
 ```
 
@@ -110,37 +109,56 @@ Data from the eHNA system for assessments marked as "locked" or "submitted", rec
 
 There are significantly more HNAs recorded in the eHNA data in 2021, than in COSD. `r length(not_in_ehna)` Trusts with data in RCRD did not appear in the eHNA data. `r length(not_in_cosd)` Trusts in the eHNA data did not appear in RCRD. Of those Trusts which do appear in both datasets, `r more_in_cosd` have more HNAs recorded in COSD than eHNA and `r more_in_ehna` have more recorded in eHNA than COSD.
 
-###### Table 5a: Difference in the number of unique HNA records in COSD compared to eHNA by NHS Trust in 2021
+###### Figure 5a: Difference in the number of unique HNA records in COSD compared to eHNA by NHS Trust in 2021
 
-```{r comparison_table, out.width='100%', fig.align='center'}  differences_graph}
+```{r comparison_Figure, out.width='100%', fig.align='center'}
+
+differences_graph
 ```
-
-## 
 
 ## 6. Overall coverage
 
-`r scales::percent(percent_pts_with_hna, accuracy = 0.01)`% of patients had at least one record of being offered a HNA within 2 years of diagnosis (`r scales::comma(pts_with_hna)` patients)
+`r scales::percent(percent_pts_with_hna, accuracy = 0.1)`% of patients had at least one record of being offered a HNA within 2 years of diagnosis (`r scales::comma(pts_with_hna)` patients)
 
-`r scales::percent(percent_pts_with_pcsp, accuracy = 0.01)`% of patients had at least one record of being offered a PCSP (or a PCSP being deemed 'not required') within 2 years of diagnosis (`r scales::comma(pts_with_pcsp)` patients)
+`r scales::percent(percent_pts_with_pcsp, accuracy = 0.1)`% of patients had at least one record of being offered a PCSP (or a PCSP being deemed 'not required') within 2 years of diagnosis (`r scales::comma(pts_with_pcsp)` patients)
 
 ## 7. Delivery across the pathway
 
 Combinations:
 
-Of the patients who had at least one record of either a HNA or PCSP (`r scales::comma(ids_either)`): - `r scales::percent(percent_only_hna, accuracy = 0.01)`% had only a HNA recorded (`r scales::comma(only_hna)`) - `r scales::percent(percent_only_pcsp, accuracy = 0.01)`% had only a PCSP recorded (`r scales::comma(only_pcsp)`) - `r scales::percent(percent_both, accuracy = 0.01)`% had both a HNA and PCSP recorded (`r scales::comma(both)`)
+Of the patients who had at least one record of either a HNA or PCSP (`r scales::comma(ids_either)`): - `r scales::percent(percent_only_hna, accuracy = 0.1)` had only a HNA recorded (`r scales::comma(only_hna)`) - `r scales::percent(percent_only_pcsp, accuracy = 0.1)` had only a PCSP recorded (`r scales::comma(only_pcsp)`) - `r scales::percent(percent_both, accuracy = 0.1)` had both a HNA and PCSP recorded (`r scales::comma(both)`).
 
+Most patients with both a HNA and PCSP recorded had their PCSP recorded on the same day as their first HNA (78.9%). Over 85% of these patients had their PCSP within a week of their first HNA record.
+
+\
 Multiple HNAs and PCSPs:
 
-###### Table 7a: Proportion of patients diagnosed in 2021 receiving each number of HNAs and PCSPs in the two years post-diagnosis 
+###### Figure 7a: Proportion of patients diagnosed in 2021 receiving each number of HNAs and PCSPs in the two years post-diagnosis
 
-```{r number_records_table, out.width='100%', fig.align='center'}  count_summary_table <- left_join(hna_count_summary, pcsp_count_summary, by = c("hna_count" = "pcsp_count"))  count_summary_table <- count_summary_table |>   rename("Number of unique HNA/PCSP records" = "hna_count") |>   rename("HNAs" = "percent_patients_hna") |>   rename("PCSPs" = "percent_patients_pcsp") |>   select(-c(number_patients_hna, number_patients_pcsp))   kable(count_summary_table, align = "c") |>   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") |>   add_header_above(c(" " = 1, "Proportion of patients" = 2))}
+```{r number_records_Figure, out.width='100%', fig.align='center'}
+
+count_summary_Figure <- left_join(hna_count_summary, pcsp_count_summary, by = c("hna_count" = "pcsp_count"))  
+
+count_summary_Figure <- count_summary_Figure |>   
+  rename("Number of unique HNA/PCSP records" = "hna_count") |>   
+  rename("HNAs" = "percent_patients_hna") |>   
+  rename("PCSPs" = "percent_patients_pcsp") |>   
+  select(-c(number_patients_hna, number_patients_pcsp))   
+
+kable(count_summary_Figure, align = "lcc") |>   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") |>   add_header_above(c(" " = 1, "Proportion of patients" = 2))
 ```
 
+\
+The median time between HNAs, where patients have more than 1 recorded, is `r round(median_multi_hnas, digits = 1)` days. `r scales::percent(multi_hnas_within_week, accuracy = 0.1)`% of multiple HNAs for the same patient occur within a week of each other.
+
+The median time between multiple PCSPs is `r median_multi_pcsps` days. `r scales::percent(multi_pcsps_within_week, accuracy = 0.1)`% of multiple PCSPs for the same patient occur within a week of each other.
+
+\
 Point in pathway code:
 
 COSD collects the 'point in pathway' when a HNA/PCSP is delivered. This is defined by the person submitting the record using a numerical code.
 
-###### Table 7b: Proportion of HNA and PCSP records with each point of pathway code, all unique records for patients diagnosed in 2021, excluding those recorded as 'not offered'
+###### Figure 7b: Proportion of HNA and PCSP records with each point of pathway code, all unique records for patients diagnosed in 2021, excluding those recorded as 'not offered'
 
 ```{r point_in_pathway, out.width='100%', fig.align='center'}
 
@@ -151,17 +169,64 @@ pathway_data <- pathway_data |>
 kable(pathway_data, align = "lcc", col.names = c("Point in pathway", 
                                                  "Proportion of HNAs", 
                                                  "Proportion of PCSPs")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
 
 pathway_graph
   
+```
+
+\
+Comparison to diagnosis date:
+
+The median time between diagnosis date and first recorded HNA is `r median_hna_diag_time` days. The median time between diagnosis date and first recorded PCSP is `r median_pcsp_diag_time` days.
+
+###### Figure 7c: Number of patients by time between diagnosis date and first recorded HNA of patients diagnosed in 2021
+
+```{r hna_diag_date, out.width='100%', fig.align='center'}
+
+hna_hist
+```
+
+######    Figure 7d: Number of patients by time between diagnosis date and first recorded PCSP of patients diagnosed in 2021
+
+```{r pcsp_diag_date, out.width='100%', fig.align='center'}
+
+pcsp_hist
+```
+
+\
+Deaths:
+
+###### Figure 7e: Proportion of patients diagnosed in 2021 receiving a HNA in the two years post-diagnosis, by 8 week survival status
+
+```{r hna_deaths, out.width='100%', fig.align='center'}
+
+deaths_hna |> select(-lower, -upper, -percent, -hna_status) |>
+  kable(format.args = list(big.mark = ","), align = "llcccc", 
+        col.names = c("Survival status", "Number of patients", "Proportion of patients", 
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
+
+```
+
+######      Figure 7f: Proportion of patients diagnosed in 2021 receiving a PCSP in the two years post-diagnosis, by 8 week survival status
+
+```{r pcsp_deaths, out.width='100%', fig.align='center'}
+
+deaths_pcsp |> select(-lower, -upper, -percent, -pcsp_status) |>
+  kable(format.args = list(big.mark = ","), align = "llcccc", 
+        col.names = c("Survival status", "Number of patients", "Proportion of patients", 
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
+
+grid.arrange(deaths_hna_graph, deaths_pcsp_graph, ncol = 2)
 ```
 
 ## 8. Staff roles
 
 COSD collects the 'staff role' of the person delivering a HNA/PCSP. This is defined by the person submitting the record using a numerical code.
 
-###### Table 8a: Proportion of HNA and PCSP records with each staff role code, all unique records for patients diagnosed in 2021, excluding those recorded as 'not offered'
+###### Figure 8a: Proportion of HNA and PCSP records with each staff role code, all unique records for patients diagnosed in 2021, excluding those recorded as 'not offered'
 
 ```{r staff_roles, out.width='100%', fig.align='center'}
 
@@ -172,154 +237,418 @@ staff_role_data <- staff_role_data |>
 kable(staff_role_data, align = "lcc", col.names = c("Staff role", 
                                                     "Proportion of HNAs", 
                                                     "Proportion of PCSPs")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
 
 staff_role_graph
   
 ```
 
-## Variation in coverage - gender
+## 9a. Variation in coverage - gender
 
-```{r gender, out.width='100%', fig.align='center'}
+###### Figure 9ai: Proportion of patients diagnosed in 2021 receiving a HNA in the two years post-diagnosis, by gender
 
-gender_hna |> select(-lower, -upper, -percent) |>
-  kable(format.args = list(big.mark = ","), align = "llcccc", 
-        col.names = c("Gender", "HNA status", "Number of patients", "Proportion of patients", 
+```{r gender_hna, out.width='100%', fig.align='left'}
+
+gender_hna |> select(-hna_status, -lower, -upper, -percent) |>
+  kable(format.args = list(big.mark = ","), align = "lcccc", 
+        col.names = c("Gender", "Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
 
-gender_pcsp |> select(-lower, -upper, -percent) |>
-  kable(format.args = list(big.mark = ","), align = "llcccc", 
-        col.names = c("Gender", "PCSP status", "Number of patients", "Proportion of patients", 
-                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
-
-
-grid.arrange(gender_hna_graph, gender_pcsp_graph, ncol=2)
+gender_hna_graph
 
 ```
 
-## Variation in coverage - age
+###### Figure 9aii: Proportion of patients diagnosed in 2021 receiving a PCSP in the two years post-diagnosis, by gender
 
-```{r age, out.width='100%'}
+```{r gender_pcsp, out.width='100%', fig.align='left'}
 
-age_hna |> select(-lower, -upper, -percent) |>
-  kable(format.args = list(big.mark = ","), align = "llcccc", 
-        col.names = c("Age group", "HNA status", "Number of patients", "Proportion of patients", 
+gender_pcsp |> select(-pcsp_status, -lower, -upper, -percent) |>
+  kable(format.args = list(big.mark = ","), align = "lcccc", 
+        col.names = c("Gender", "Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
 
-age_pcsp |> select(-lower, -upper, -percent) |>
-  kable(format.args = list(big.mark = ","), align = "llcccc", 
-        col.names = c("Age group", "PCSP status", "Number of patients", "Proportion of patients", 
-                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
-
-
-grid.arrange(age_hna_graph, age_pcsp_graph, ncol=2)
+gender_pcsp_graph
 
 ```
 
-## Variation in coverage - ethnicity
+###### 
 
-```{r ethnicity, out.width='100%', fig.align='center'}
+###### Figure 9aiii: Median time from diagnosis to first HNA for patients diagnosed in 2021, by gender
 
-ethnicity_hna |> select(-lower, -upper, -percent) |>
-  kable(format.args = list(big.mark = ","), align = "llcccc", 
-        col.names = c("Age group", "HNA status", "Number of patients", "Proportion of patients", 
+```{r median_hna_gender, out.width='100%', fig.align='left'}
+
+patient_level_data |>
+  group_by(gender) |>
+  summarise(median = median(hna_time_diag_event, na.rm = TRUE)) |>
+  filter(!is.na(gender)) |>
+  mutate(gender = ifelse(gender == 1, "Male", "Female")) |>
+  kable(align = "lc", 
+        col.names = c("Gender", "Median number of days")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
+```
+
+###### 
+
+###### Figure 9aiv: Median time from diagnosis to first PCSP for patients diagnosed in 2021, by gender
+
+```{r median_pcsp_gender, out.width='100%', fig.align='left'}
+
+patient_level_data |>
+  group_by(gender) |>
+  summarise(median = median(pcsp_time_diag_event, na.rm = TRUE)) |>
+  filter(!is.na(gender)) |>
+  mutate(gender = ifelse(gender == 1, "Male", "Female")) |>
+  kable(align = "lc", 
+        col.names = c("Gender", "Median number of days")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
+```
+
+## 9b. Variation in coverage - age
+
+###### Figure 9bi: Proportion of patients diagnosed in 2021 receiving a HNA in the two years post-diagnosis, by age
+
+```{r age_hna, out.width='100%'}
+
+age_hna |> select(-hna_status, -lower, -upper, -percent) |>
+  kable(format.args = list(big.mark = ","), align = "lcccc", 
+        col.names = c("Age group", "Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
 
-ethnicity_pcsp |> select(-lower, -upper, -percent) |>
-  kable(format.args = list(big.mark = ","), align = "llcccc", 
-        col.names = c("Age group", "PCSP status", "Number of patients", "Proportion of patients", 
+age_hna_graph
+```
+
+###### Figure 9bii: Proportion of patients diagnosed in 2021 receiving a PCSP in the two years post-diagnosis, by age
+
+```{r age_pcsp, out.width='100%'}
+
+age_pcsp |> select(-pcsp_status, -lower, -upper, -percent) |>
+  kable(format.args = list(big.mark = ","), align = "lcccc", 
+        col.names = c("Age group", "Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
 
-
-grid.arrange(ethnicity_hna_graph, ethnicity_pcsp_graph, ncol=2)
+age_pcsp_graph
 
 ```
 
-## Variation in coverage - deprivation
+###### 
 
-```{r imd, out.width='100%', fig.align='center'}
+###### Figure 9biii: Median time from diagnosis to first HNA for patients diagnosed in 2021, by age
 
-imd_hna |> select(-c(lower, upper, percent)) |>
-  kable(format.args = list(big.mark = ","), align = "llcccc", 
-        col.names = c("Deprivation decile", "HNA status", "Number of patients", "Proportion of patients", 
-                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+```{r median_hna_age, out.width='100%', fig.align='left'}
 
-imd_pcsp |> select(-c(lower, upper, percent)) |>
-  kable(format.args = list(big.mark = ","), align = "llcccc", 
-        col.names = c("Deprivation decile", "PCSP status", "Number of patients", "Proportion of patients", 
-                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
-
-
-grid.arrange(imd_hna_graph, imd_pcsp_graph, ncol=2)
-
+patient_level_data |>
+  group_by(age_group) |>
+  summarise(median = median(hna_time_diag_event, na.rm = TRUE)) |>
+  kable(align = "lc",          
+        col.names = c("Age group", "Median number of days")) |>   
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
 ```
 
-## Variation in coverage - tumour type
+###### 
 
-```{r site, out.width='100%', fig.align='center'}
+###### Figure 9biv: Median time from diagnosis to first PCSP for patients diagnosed in 2021, by age
+
+```{r median_pcsp_age, out.width='100%', fig.align='left'}
+
+patient_level_data |>
+  group_by(age_group) |>
+  summarise(median = median(pcsp_time_diag_event, na.rm = TRUE)) |>
+  kable(align = "lc",          
+        col.names = c("Age group", "Median number of days")) |>   
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
+```
+
+## 9c. Variation in coverage - ethnicity
+
+###### Figure 9ci: Proportion of patients diagnosed in 2021 receiving a HNA in the two years post-diagnosis, by ethnicity
+
+```{r ethnicity_hna, out.width='100%', fig.align='center'}
+
+ethnicity_hna |> select(-hna_status, -lower, -upper, -percent) |>
+  kable(format.args = list(big.mark = ","), align = "lcccc", 
+        col.names = c("Age group","Number of patients", "Proportion of patients", 
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center")
+
+ethnicity_hna_graph
+```
+
+###### 
+
+###### Figure 9cii: Proportion of patients diagnosed in 2021 receiving a PCSP in the two years post-diagnosis, by ethnicity
+
+```{r ethnicity_pcsp, out.width='100%', fig.align='center'}
+
+ethnicity_pcsp |> select(-pcsp_status, -lower, -upper, -percent) |>
+  kable(format.args = list(big.mark = ","), align = "lcccc", 
+        col.names = c("Age group", "Number of patients", "Proportion of patients", 
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
+
+ethnicity_pcsp_graph
+```
+
+###### 
+
+###### 
+
+###### Figure 9ciii: Median time from diagnosis to first PCSP for patients diagnosed in 2021, by ethnicity
+
+```{r median_hna_ethnicity, out.width='100%', fig.align='left'}
+
+patient_level_data |>
+  group_by(ethnicity) |>
+  summarise(median = median(hna_time_diag_event, na.rm = TRUE)) |>
+  filter(!is.na(ethnicity)) |>
+  kable(align = "lc",                   
+        col.names = c("Ethnicity", "Median number of days")) |>      
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
+```
+
+###### 
+
+###### Figure 9civ: Median time from diagnosis to first PCSP for patients diagnosed in 2021, by ethnicity
+
+```{r median_pcsp_ethnicity, out.width='100%', fig.align='left'}
+
+patient_level_data |>
+  group_by(ethnicity) |>
+  summarise(median = median(pcsp_time_diag_event, na.rm = TRUE)) |>
+  filter(!is.na(ethnicity)) |>
+  kable(align = "lc",                   
+        col.names = c("Ethnicity", "Median number of days")) |>      
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
+```
+
+## 9d. Variation in coverage - deprivation
+
+###### Figure 9di: Proportion of patients diagnosed in 2021 receiving a HNA in the two years post-diagnosis, by deprivation decile
+
+```{r imd_hna, out.width='100%', fig.align='center'}
+
+imd_hna |> select(-c(hna_status, lower, upper, percent)) |>
+  kable(format.args = list(big.mark = ","), align = "lcccc", 
+        col.names = c("Deprivation decile", "Number of patients", "Proportion of patients", 
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
+
+imd_hna_graph
+```
+
+###### 
+
+###### 
+
+###### Figure 9dii: Proportion of patients diagnosed in 2021 receiving a PCSP in the two years post-diagnosis, by deprivation decile
+
+```{r imd_pcsp, out.width='100%', fig.align='center'}
+
+imd_pcsp |> select(-c(pcsp_status, lower, upper, percent)) |>
+  kable(format.args = list(big.mark = ","), align = "lcccc", 
+        col.names = c("Deprivation decile", "Number of patients", "Proportion of patients", 
+                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
+
+imd_pcsp_graph
+```
+
+###### 
+
+###### Figure 9diii: Median time from diagnosis to first HNA for patients diagnosed in 2021, by deprivation decile
+
+```{r median_hna_imd, out.width='100%', fig.align='left'}
+
+patient_level_data |>
+  group_by(imd19_decile_lsoas) |>
+  summarise(median = median(hna_time_diag_event, na.rm = TRUE)) |>
+  filter(!is.na(imd19_decile_lsoas)) |>
+  kable(align = "lc",                   
+        col.names = c("Deprivation decile", "Median number of days")) |>      
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
+```
+
+###### 
+
+###### Figure 9div: Median time from diagnosis to first PCSP for patients diagnosed in 2021, by deprivation decile
+
+```{r median_pcsp_imd, out.width='100%', fig.align='left'}
+
+patient_level_data |>
+  group_by(imd19_decile_lsoas) |>
+  summarise(median = median(pcsp_time_diag_event, na.rm = TRUE)) |>
+  filter(!is.na(imd19_decile_lsoas)) |>
+  kable(align = "lc",                   
+        col.names = c("Deprivation decile", "Median number of days")) |>      
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
+```
+
+## 9e. Variation in coverage - tumour type
+
+###### Figure 9ei: Proportion of patients diagnosed in 2021 receiving a HNA in the two years post-diagnosis, by tumour type
+
+```{r site_hna, out.width='100%', fig.align='center'}
 
 site_hna |> select(-c(lower, upper, percent, hna_status)) |>
   kable(format.args = list(big.mark = ","), align = "lcccc", 
         col.names = c("Tumour type","Number of patients", "Proportion of patients",
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
+
+site_hna_graph
+```
+
+###### 
+
+###### Figure 9eii: Proportion of patients diagnosed in 2021 receiving a PCSP in the two years post-diagnosis, by tumour type
+
+```{r site_pcsp, out.width='100%', fig.align='center'}
 
 site_pcsp |> select(-c(lower, upper, percent, pcsp_status)) |>
   kable(format.args = list(big.mark = ","), align = "lcccc", 
         col.names = c("Tumour type","Number of patients", "Proportion of patients",
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
 
-
-grid.arrange(site_hna_graph, site_pcsp_graph, ncol=2)
+site_pcsp_graph
 ```
 
-## Variation in coverage - stage at diagnosis
+###### 
 
-```{r stage, out.width='100%', fig.align='center'}
+###### 
+
+###### Figure 9eiii: Median time from diagnosis to first HNA for patients diagnosed in 2021, by tumour type
+
+```{r median_hna_site, out.width='100%', fig.align='left'}
+
+patient_level_data |>
+  group_by(ndrs_main) |>
+  summarise(median = median(hna_time_diag_event, na.rm = TRUE)) |>
+  filter(!is.na(ndrs_main)) |>
+  kable(align = "lc",                   
+        col.names = c("Tumour type", "Median number of days")) |>      
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
+```
+
+###### 
+
+###### Figure 9eiv: Median time from diagnosis to first PCSP for patients diagnosed in 2021, by tumour type
+
+```{r median_pcsp_site, out.width='100%', fig.align='left'}
+
+patient_level_data |>
+  group_by(ndrs_main) |>
+  summarise(median = median(pcsp_time_diag_event, na.rm = TRUE)) |>
+  filter(!is.na(ndrs_main)) |>
+  kable(align = "lc",                   
+        col.names = c("Tumour type", "Median number of days")) |>      
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
+```
+
+## 9f. Variation in coverage - stage at diagnosis
+
+###### Figure 9fi: Proportion of patients diagnosed in 2021 receiving a HNA in the two years post-diagnosis, by stage at diagnosis
+
+```{r stage_hna, out.width='100%', fig.align='center'}
 
 stage_hna |> select(-c(lower, upper, percent, hna_status)) |>
   kable(format.args = list(big.mark = ","), align = "lcccc", 
         col.names = c("Stage at diagnosis","Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
 
-stage_pcsp |> select(-c(lower, upper, percent)) |>
+stage_hna_graph
+```
+
+###### 
+
+###### 
+
+###### Figure 9fii: Proportion of patients diagnosed in 2021 receiving a PCSP in the two years post-diagnosis, by stage at diagnosis
+
+```{r stage_pcsp, out.width='100%', fig.align='center'}
+
+stage_pcsp |> select(-c(pcsp_status, lower, upper, percent)) |>
   kable(format.args = list(big.mark = ","), align = "lcccc", 
         col.names = c("Stage at diagnosis","Number of patients", "Proportion of patients", 
                       "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
 
-
-grid.arrange(stage_hna_graph, stage_pcsp_graph, ncol=2)
+stage_pcsp_graph
 ```
 
-## Variation in coverage - geography
+###### 
+
+###### Figure 9fiii: Median time from diagnosis to first HNA for patients diagnosed in 2021, by stage at diagnosis
+
+```{r median_hna_stage, out.width='100%', fig.align='left'}
+
+patient_level_data |>
+  group_by(STAGE) |>
+  summarise(median = median(hna_time_diag_event, na.rm = TRUE)) |>
+  filter(!is.na(STAGE)) |>
+  kable(align = "lc",                   
+        col.names = c("Stage at diagnosis", "Median number of days")) |>      
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
+```
+
+###### Figure 9fiv: Median time from diagnosis to first PCSP for patients diagnosed in 2021, by stage at diagnosis
+
+```{r median_pcsp_stage, out.width='100%', fig.align='left'}
+
+patient_level_data |>
+  group_by(STAGE) |>
+  summarise(median = median(pcsp_time_diag_event, na.rm = TRUE)) |>
+  filter(!is.na(STAGE)) |>
+  kable(align = "lc",                   
+        col.names = c("Stage at diagnosis", "Median number of days")) |>      
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
+```
+
+## 9g. Variation in coverage - geography
 
 Geographic variation is measured by the trust of diagnosis, which is assumed to be the most likely trust delivering first HNAs and PCSPs.
 
-```{r geog, out.width='100%', fig.align='center'}
+###### Figure 9gi: Number of trusts by HNA coverage among patients diagnosed in 2021
+
+```{r geog_hna, out.width='100%', fig.align='center'}
 
 trust_coverage_hna_cats |> 
   kable(format.args = list(big.mark = ","), align = "lc", 
         col.names = c("Proportion of patients offered a HNA", "Number of trusts")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
+
+trust_hna_graph
+```
+
+###### Figure 9gii: Number of trusts by PCSP coverage among patients diagnosed in 2021
+
+```{r geog_pcsp, out.width='100%', fig.align='center'}
 
 trust_coverage_pcsp_cats |> 
   kable(format.args = list(big.mark = ","), align = "lc", 
         col.names = c("Proportion of patients offered a PCSP", "Number of trusts")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 14, position = "center") 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
 
-grid.arrange(trust_hna_graph, trust_pcsp_graph, ncol=2)
-
+trust_pcsp_graph
 ```
 
+\
 NHS trusts do not have clearly defined catchment areas, so the below shows the average coverage in NHS trusts within each ICB.
+
+###### 
+
+###### Figure 9giii: HNA coverage in patients diagnosed in 2021 by ICB
+
+![](C:/Users\elau2\OneDrive%20-%20NHS%20Digital\Documents\HNAs%20C%20drive\COSD%20level%203%20analysis%20C%20drive\HNA_PCSP_coverage\hna_map.jpeg)
+
+###### 
+
+###### 
+
+###### Figure 9giv: PCSP coverage in patients diagnosed in 2021 by ICB
+
+![](C:/Users\elau2\OneDrive%20-%20NHS%20Digital\Documents\HNAs%20C%20drive\COSD%20level%203%20analysis%20C%20drive\HNA_PCSP_coverage\pcsp_map.jpeg)

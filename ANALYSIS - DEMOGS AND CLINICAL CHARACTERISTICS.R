@@ -105,7 +105,7 @@ age_pcsp <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(age_group), hna_status == "Has PCSP") |>
+  filter(!is.na(age_group), pcsp_status == "Has PCSP") |>
   ungroup() 
 
 age_hna_graph <- ggplot(age_hna, 
@@ -250,7 +250,7 @@ imd_pcsp_graph <- ggplot(imd_pcsp,
 
 ####by tumour type-----------
 site_hna <- patient_level_data |>
-  filter(keepforhna == "INCLUDE") |>
+  filter(keepforhna == "INCLUDE", ndrs_main != "to be grouped", ndrs_main != "See skin table") |>
   group_by(ndrs_main, hna_status) |>
   summarise(number_patients = n()) |>
   ungroup() |>
@@ -266,7 +266,7 @@ site_hna <- patient_level_data |>
   ungroup() 
 
 site_pcsp <- patient_level_data |>
-  filter(keepforpcsp == "INCLUDE") |>
+  filter(keepforpcsp == "INCLUDE", ndrs_main != "to be grouped", ndrs_main != "See skin table") |>
   group_by(ndrs_main, pcsp_status) |>
   summarise(number_patients = n()) |>
   ungroup() |>
@@ -314,7 +314,7 @@ stage_hna <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(STAGE), STAGE != "Error", STAGE != "Missing", hna_status == "Has HNA") |>
+  filter(hna_status == "Has HNA", !is.na(STAGE), STAGE != "Error", STAGE != "Missing") |>
   ungroup() 
 
 stage_pcsp <- patient_level_data |>
@@ -330,7 +330,7 @@ stage_pcsp <- patient_level_data |>
          lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(!is.na(STAGE), STAGE != "Error", STAGE != "Missing", pcsp_status == "Has PCSP") |>
+  filter(pcsp_status == "Has PCSP", !is.na(STAGE), STAGE != "Error", STAGE != "Missing") |>
   ungroup()
 
 stage_hna_graph <- ggplot(stage_hna, 

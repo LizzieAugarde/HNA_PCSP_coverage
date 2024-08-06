@@ -19,11 +19,11 @@ query <- "select
   rp.event_date,
   rp.event_end,
   rp.trust_code
-  from analysisncr.at_rapid_pathway@cas2405 rp 
+  from analysisncr.at_rapid_pathway@cas2406 rp 
   where rp.event_type = 20 
   and (rp.event_date >= '01-JAN-2021' AND rp.event_date <= '31-DEC-2021')"
 
-hnas_2021_data <- dbGetQueryOracle(cas2405, query, rowlimit = NA)
+hnas_2021_data <- dbGetQueryOracle(cas2406, query, rowlimit = NA)
 
 #pre-processing COSD data
 hnas_2021_data <- hnas_2021_data |> 

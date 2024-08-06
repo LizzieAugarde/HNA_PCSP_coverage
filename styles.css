@@ -5,7 +5,13 @@
 }
 
 .reveal .slides h2 {
-	font-size: 20px !important; 
+	font-size: 28px !important; 
+	font-family: Arial !important;
+	font-weight: bold !important;
+}
+
+.reveal .slides h6 {
+	font-size: 12px !important; 
 	font-family: Arial !important;
 	font-weight: bold !important;
 }
@@ -23,7 +29,6 @@
 .reveal .slides {
   display: flex;
   justify-content: center;
-  align-items: center;
   height: 100%;
 }
 
@@ -45,14 +50,25 @@
   height: auto;
 }
 
-/* Ensure kable tables are centered */
-.reveal table  {
-  margin-left: auto;
-  margin-right: auto;
-}
-
 .reveal table, 
 .reveal th, 
 .reveal td {
   font-family: Arial, sans-serif;
+}
+
+.reveal .kable-table {
+  margin-left: 0 !important;
+}
+
+.reveal .slide kable-table {
+  margin-left: 0 !important;
+}
+
+.reveal section table {
+  margin-left: 0 !important; /* Aligns table to the left */
+  width: auto !important;    /* Ensures the table does not stretch */
+}
+
+.reveal section {
+  text-align: left; /* Ensures all content is left-aligned */
 }

@@ -72,11 +72,19 @@ pathway_data <- hna_pcsp_data %>%
                                       point_of_pathway == "05" ~ "Diagnosis of recurrence", 
                                       point_of_pathway == "06" ~ "Transition to palliative care",
                                       point_of_pathway == "07" ~ "Prehabilitation",
-                                      TRUE ~ "Other"))
+                                      TRUE ~ "Other")) |>
+  mutate(point_of_pathway = factor(point_of_pathway, levels = c("Initial cancer diagnosis",
+                                                                "Start of treatment",
+                                                                "During treatment",
+                                                                "End of treatment",
+                                                                "Diagnosis of recurrence", 
+                                                                "Prehabilitation",
+                                                                "Transition to palliative care", "Other")))
 
 
 offered_code_graph <- ggplot(offered_code_data, aes(x = offered_code, y = percent_graph, group = event_type)) + 
   geom_bar(stat = "identity", position = "dodge", aes(fill = event_type)) + 
+  scale_fill_manual(values = c("#008A26", "#02D462")) +
   labs(x = "Status", y = "Proportion of events", fill = "") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme(axis.text.x = element_text(angle = 45, hjust=1),
@@ -86,6 +94,7 @@ offered_code_graph <- ggplot(offered_code_data, aes(x = offered_code, y = percen
 
 staff_role_graph <- ggplot(staff_role_data, aes(x = staff_role, y = percent_graph, group = event_type)) + 
   geom_bar(stat = "identity", position = "dodge", aes(fill = event_type)) + 
+  scale_fill_manual(values = c("#008A26", "#02D462")) +
   labs(x = "Staff role", y = "Proportion of events", fill = "") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme(axis.text.x = element_text(angle = 45, hjust=1),
@@ -95,6 +104,7 @@ staff_role_graph <- ggplot(staff_role_data, aes(x = staff_role, y = percent_grap
 
 pathway_graph <- ggplot(pathway_data, aes(x = point_of_pathway, y = percent_graph, group = event_type)) + 
   geom_bar(stat = "identity", position = "dodge", aes(fill = event_type)) + 
+  scale_fill_manual(values = c("#008A26", "#02D462")) +
   labs(x = "Point of pathway", y = "Proportion of events", fill = "") + 
   scale_y_continuous(limits = c(0, 100)) +
   theme(axis.text.x = element_text(angle = 45, hjust=1),

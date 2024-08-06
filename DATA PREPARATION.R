@@ -15,7 +15,7 @@ library(NDRSAfunctions)
 library(tidyverse)
 library(janitor)
 
-cas2405 <- createConnection(port = 1525, sid = "cas2405")
+cas2406 <- createConnection(port = 1525, sid = "cas2406")
 
 ###### EXTRACTING AND CLEANING RAW DATA #######
 #patient cohort----
@@ -51,11 +51,35 @@ query <- "select * from (
   and tum.site_icd10_o2_3char <> 'C44') 
 where rank = 1"
 
-patient_cohort <- dbGetQueryOracle(cas2405, query, rowlimit = NA)
+patient_cohort <- dbGetQueryOracle(cas2406, query, rowlimit = NA)
 
 patient_cohort <- patient_cohort %>% 
   clean_names() %>%
   unique()
+
+
+###### RECODING STAGE AND REMOVING STAGE 0 CASES ######
+source("stage_functions_tidy.R")
+
+#trans patient fix from 02_data_tidying_tidy.R received from Chloe Bright
+patient_cohort <- patient_cohort %>% mutate(
+  stage_pi_detail = if_else(
+    condition = (
+      (
+        (gender == 2 & site_icd10r4_o2_3char_from2013 %in% c("C60", "C61", "C62", "C63")) |
+          (gender == 1 & site_icd10r4_o2_3char_from2013 %in% c("C51", "C52", "C53", "C54", "C55", "C56", "C57", "C58"))
+      ) &
+        !(stage_best == "?" | is.na(stage_best))
+    ),
+    true = "Y",
+    false = stage_pi_detail
+  )
+)
+
+patient_cohort <- stage_table(patient_cohort) 
+
+patient_cohort <- patient_cohort |>
+  select(-c(stage_best_system, stage_pi_detail, site_icd10r4_o2_3char_from2013, SUMMARY_STAGE, EARLY_ADVANCED_STAGE)) 
 
 #HNA and PCSP records------
 query <- "select * from (
@@ -73,7 +97,7 @@ query <- "select * from (
   rank () over (partition by pat.patientid order by tum.diagnosisdatebest, tum.tumourid asc) as rank
   from av2021.at_patient_england@casref01 pat 
   left join av2021.at_tumour_england@casref01 tum on pat.patientid = tum.patientid
-  left join analysisncr.at_rapid_pathway@cas2405 rp on pat.nhsnumber = rp.nhsnumber 
+  left join analysisncr.at_rapid_pathway@cas2406 rp on pat.nhsnumber = rp.nhsnumber 
   where tum.diagnosisyear = 2021
   and tum.cascade_inci_flag = 1 
   and tum.dco = 'N'
@@ -86,7 +110,7 @@ query <- "select * from (
   and rp.event_type in (20, 24))
 where rank = 1"
 
-raw_hna_pcsp_data <- dbGetQueryOracle(cas2405, query, rowlimit = NA)
+raw_hna_pcsp_data <- dbGetQueryOracle(cas2406, query, rowlimit = NA)
 
 raw_hna_pcsp_data <- raw_hna_pcsp_data %>% 
   clean_names() %>%
@@ -100,34 +124,12 @@ raw_hna_pcsp_data <- raw_hna_pcsp_data %>%
          pcsp = case_when(event_type == 24 ~ "Y", TRUE ~ "N")) %>%
   
   #joining to patient cohort to get demographic info 
-  left_join(., patient_cohort, by = "patientid")
-
-
-###### RECODING STAGE AND REMOVING STAGE 0 CASES ######
-source("stage_functions_tidy.R")
-
-#trans patient fix from 02_data_tidying_tidy.R received from Chloe Bright
-raw_hna_pcsp_data <- raw_hna_pcsp_data %>% mutate(
-  stage_pi_detail = if_else(
-    condition = (
-      (
-        (gender == 2 & site_icd10r4_o2_3char_from2013 %in% c("C60", "C61", "C62", "C63")) |
-          (gender == 1 & site_icd10r4_o2_3char_from2013 %in% c("C51", "C52", "C53", "C54", "C55", "C56", "C57", "C58"))
-      ) &
-        !(stage_best == "?" | is.na(stage_best))
-    ),
-    true = "Y",
-    false = stage_pi_detail
-  )
-)
-
-raw_hna_pcsp_data <- stage_table(raw_hna_pcsp_data) 
-
-raw_hna_pcsp_data <- raw_hna_pcsp_data |>
-  select(-c(stage_best_system, stage_pi_detail, site_icd10r4_o2_3char_from2013))
+  left_join(., patient_cohort, by = "patientid") |> 
+  select(-c(tumourid.y, diagnosisdatebest.y, rank.x, rank.y)) |>
+  rename("diagnosisdatebest" = "diagnosisdatebest.x", "tumourid" = "tumourid.x")
 
 #count of all HNA and PCSP records 
-all_records <- sum(raw_hna_pcsp_data$hna == "Y" | raw_hna_pcsp_data$pcsp == "Y") #1873053 records of a HNA/PCSP
+all_records <- sum(raw_hna_pcsp_data$hna == "Y" | raw_hna_pcsp_data$pcsp == "Y") #1895742 records of a HNA/PCSP
 
 
 ###### REMOVING DUPLICATES, INITIAL NUMBERS #######
@@ -136,22 +138,22 @@ hna_pcsp_data <- raw_hna_pcsp_data %>%
   separate(event_property_1, c("point_of_pathway", "offered_code", "staff_role"), ":") 
 
 denom_size <- length(unique(patient_cohort$patientid)) #311627 patients in overall denominator
-unique_hnas_pcsps <- sum(hna_pcsp_data$hna == "Y" | hna_pcsp_data$pcsp == "Y") #245323 unique records of a HNA/PCSP
-unique_hnas <-sum(hna_pcsp_data$hna == "Y") #134245 unique HNA records
-unique_pcsps <-sum(hna_pcsp_data$pcsp == "Y") #111078 unique PCSP records
+unique_hnas_pcsps <- sum(hna_pcsp_data$hna == "Y" | hna_pcsp_data$pcsp == "Y") #245592 unique records of a HNA/PCSP
+unique_hnas <-sum(hna_pcsp_data$hna == "Y") #134332 unique HNA records
+unique_pcsps <-sum(hna_pcsp_data$pcsp == "Y") #111260 unique PCSP records
 
 #counting then excluding records with offered code 04 'Not offered'
 hnas_notoff <- sum(hna_pcsp_data$hna == "Y" & hna_pcsp_data$offered_code == "04") #466 not offered HNA records
-pcsps_notoff <- sum(hna_pcsp_data$pcsp == "Y" & hna_pcsp_data$offered_code == "04") #8705 not offered PCSP records
+pcsps_notoff <- sum(hna_pcsp_data$pcsp == "Y" & hna_pcsp_data$offered_code == "04") #8743 not offered PCSP records
 
 hna_pcsp_data <- hna_pcsp_data %>%
   filter(offered_code != "04" | is.na(offered_code)) #counting NA or invalid offered_code as offered for now
 
-unique_off_hnas_pcsps <- sum(hna_pcsp_data$hna == "Y" | hna_pcsp_data$pcsp == "Y") #236076 unique records of an OFFERED HNA/PCSP 
-unique_off_hnas <- sum(hna_pcsp_data$hna == "Y") #133735 unique OFFERED HNA records
-unique_off_pcsps <- sum(hna_pcsp_data$pcsp == "Y") #102341 unique OFFERED PCSP records
+unique_off_hnas_pcsps <- sum(hna_pcsp_data$hna == "Y" | hna_pcsp_data$pcsp == "Y") #236383 unique records of an OFFERED HNA/PCSP 
+unique_off_hnas <- sum(hna_pcsp_data$hna == "Y") #133866 unique OFFERED HNA records
+unique_off_pcsps <- sum(hna_pcsp_data$pcsp == "Y") #102517 unique OFFERED PCSP records
 
-pcsps_notreq <- sum(hna_pcsp_data$pcsp == "Y" & hna_pcsp_data$offered_code == "06") #40824 not required PCSP records
+pcsps_notreq <- sum(hna_pcsp_data$pcsp == "Y" & hna_pcsp_data$offered_code == "06") #40894 not required PCSP records
 
 
 ###### REMOVING NON-SUBMITTING TRUSTS #######
@@ -187,16 +189,16 @@ pcsps_denom_size <- length(which(patient_cohort$keepforpcsp == "INCLUDE")) #3001
 
 ###### PATIENT NUMBERS AND DATASETS #######
 #overall numbers of patients with HNAs/PCSPs
-pts_with_hna <- length(unique(hna_data$patientid)) #79866 patients with at least one HNA record
-pts_with_pcsp <- length(unique(pcsp_data$patientid)) #71863 patients with at least one PCSP record
+pts_with_hna <- length(unique(hna_data$patientid)) #79897 patients with at least one HNA record
+pts_with_pcsp <- length(unique(pcsp_data$patientid)) #71920 patients with at least one PCSP record
 
 ids_hna <- unique(hna_data$patientid)
 ids_pcsp <- unique(pcsp_data$patientid)
-ids_either <- length(unique(c(ids_hna, ids_pcsp))) #86347 patients with at least one HNA or PCSP record
+ids_either <- length(unique(c(ids_hna, ids_pcsp))) #86424 patients with at least one HNA or PCSP record
 
-only_hna <- length(setdiff(ids_hna, ids_pcsp)) #14484 patients with only an HNA 
-only_pcsp <- length(setdiff(ids_pcsp, ids_hna)) #6481 patients with only a PCSP
-both <- length(intersect(ids_hna, ids_pcsp)) #65382 patients with both
+only_hna <- length(setdiff(ids_hna, ids_pcsp)) #14504 patients with only an HNA 
+only_pcsp <- length(setdiff(ids_pcsp, ids_hna)) #6527 patients with only a PCSP
+both <- length(intersect(ids_hna, ids_pcsp)) #65393 patients with both
 
 
 ###### RANKING BY DATE ######
@@ -235,11 +237,11 @@ hna_data <- hna_data %>%
 
 pcsp_data <- pcsp_data %>% 
   filter(rank == 1) %>%
-  select(c(patientid, event_type, offered_code, point_of_pathway, staff_role, event_date, rank, time_diag_event, keepforpcsp)) %>%
+  select(c(patientid, event_type, offered_code, point_of_pathway, staff_role, event_date, rank, time_diag_event, keepforpcsp, STAGE)) %>%
   rename("pcsp_event_type" = "event_type", "pcsp_point_of_pathway" = "point_of_pathway", "pcsp_staff_role" = "staff_role", "pcsp_date" = "event_date", 
          "pcsp_rank" = "rank", "pcsp_time_diag_event" = "time_diag_event", "pcsp_offered_code" = "offered_code")
 
-both_patient_level <- inner_join(hna_data, pcsp_data, by = "patientid") 
+both_patient_level <- inner_join(hna_data, pcsp_data, by = "patientid") |> select(-STAGE.y) |> rename("STAGE" = "STAGE.x")
 
 hna_only_patient_level <- anti_join(hna_data, both_patient_level, by = "patientid") %>%
   mutate(pcsp_event_type = NA, pcsp_point_of_pathway = NA, pcsp_staff_role = NA, pcsp_date = NA)
