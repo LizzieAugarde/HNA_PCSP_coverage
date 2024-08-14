@@ -79,10 +79,11 @@ patient_level_data <- patient_level_data |>
          pcsp_time_diag_event = as.numeric(pcsp_time_diag_event))
 
 hna_hist <- ggplot(patient_level_data, aes(x = hna_time_diag_event)) +
-  geom_histogram(binwidth = 10, fill = "#008A26", color = "black") +
-  scale_y_continuous(limits = c(0,15000),
-                     breaks = c(5000,10000,15000), 
-                     labels = c("5,000", "10,000", "15,000")) +
+  geom_histogram(aes(y = cumsum(..count..)), 
+                 binwidth = 10, fill = "#008A26", color = "black") +
+  scale_y_continuous(limits = c(0,75000),
+                     breaks = c(25000,50000,75000), 
+                     labels = label_comma()) +
   scale_x_continuous(breaks = c(30,42,56,84,183,365,548,730),
                      labels = c("4 weeks", "6 weeks", "8 weeks", "12 weeks",
                                 "6 months", "1 year", "18 months", "2 years")) +
@@ -90,13 +91,12 @@ hna_hist <- ggplot(patient_level_data, aes(x = hna_time_diag_event)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
-median_hna_diag_time <- median(patient_level_data$hna_time_diag_event, na.rm=TRUE)
-
 pcsp_hist <- ggplot(patient_level_data, aes(x = pcsp_time_diag_event)) +
-  geom_histogram(binwidth = 10, fill = "#008A26", color = "black") +
-  scale_y_continuous(limits = c(0,25000),
-                     breaks = c(5000,10000,15000,20000,25000), 
-                     labels = c("5,000", "10,000","15,000","20,000","25,000")) +
+  geom_histogram(aes(y = cumsum(..count..)), 
+                     binwidth = 10, fill = "#008A26", color = "black") +
+  scale_y_continuous(limits = c(0,75000),
+                     breaks = c(25000,50000,75000), 
+                     labels = label_comma()) +
   scale_x_continuous(breaks = c(30,42,56,84,183,365,548,730),
                      labels = c("4 weeks", "6 weeks", "8 weeks", "12 weeks",
                                 "6 months", "1 year", "18 months", "2 years")) +
@@ -104,5 +104,25 @@ pcsp_hist <- ggplot(patient_level_data, aes(x = pcsp_time_diag_event)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
+
+#median number of days between diagnosis and first HNA/PCSP
+median_hna_diag_time <- median(patient_level_data$hna_time_diag_event, na.rm=TRUE)
 median_pcsp_diag_time <- median(patient_level_data$pcsp_time_diag_event, na.rm=TRUE)
 
+
+#time in which 90% of patients with an offer have their HNA/PCSP 
+hnas_90_percent <- patient_level_data |>
+  filter(hna_status == "Has HNA") |>
+  arrange(hna_time_diag_event) |> 
+  mutate(cumulative_proportion = cumsum(rep(1/n(), n()))) |> 
+  filter(cumulative_proportion >= 0.90) |> 
+  slice(1) |> 
+  pull(hna_time_diag_event)
+
+pcsps_90_percent <- patient_level_data |>
+  filter(pcsp_status == "Has PCSP") |>
+  arrange(pcsp_time_diag_event) |> 
+  mutate(cumulative_proportion = cumsum(rep(1/n(), n()))) |> 
+  filter(cumulative_proportion >= 0.90) |> 
+  slice(1) |> 
+  pull(pcsp_time_diag_event)

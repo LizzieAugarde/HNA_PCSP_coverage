@@ -205,6 +205,8 @@ hna_hist
 pcsp_hist
 ```
 
+By 10 months post-diagnosis, 90% of those patients who are offered a HNA in the 2 years post-diagnosis have received an offer of a HNA. By 5 months post-diagnosis, 90% of those patients who are offered a PCSP in the 2 years post-diagnosis have received an offer of a PCSP.
+
 Multiple HNAs and PCSPs:
 
 ###### Figure 7a: Proportion of patients diagnosed in 2021 receiving each number of HNAs and PCSPs in the two years post-diagnosis
