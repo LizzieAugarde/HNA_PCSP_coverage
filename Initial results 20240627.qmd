@@ -83,18 +83,20 @@ After excluding the non-submitting Trusts from the data, there were `r scales::c
 
 ###### Figure 3a: Number and proportion of HNA and PCSP records with each status code, all unique records for patients diagnosed in 2021, excluding those recorded as 'not offered'
 
-```{r offered_code_Figure, out.width='100%', fig.align='center'}
+```{r offered_code_table, out.width='100%', fig.align='center'}
 
 offered_code_data <- offered_code_data |>
   select(event_type, offered_code, offered_code_desc, percent) |>
   pivot_wider(names_from = "event_type", values_from = "percent") |>
   mutate(HNA = ifelse(is.na(HNA), "-", HNA)) 
 
-kable(offered_code_data, align = "llcc", col.names = c("Status code",
-                                                      "Status", 
-                                                      "Proportion of HNAs", 
-                                                      "Proportion of PCSPs")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center")
+kable(offered_code_data, align = "llcc", 
+      col.names = c("Status code",
+                    "Status", 
+                    "Proportion of HNAs", 
+                    "Proportion of PCSPs")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = F, font_size = 12, position = "center")
   
 ```
 
@@ -139,7 +141,14 @@ ehna_cosd_comparison_graph
 
 `r scales::percent(percent_pts_with_pcsp, accuracy = 0.1)` of patients had at least one record of being offered a PCSP (or a PCSP being deemed 'not required') within 2 years of diagnosis (`r scales::comma(pts_with_pcsp)` patients)
 
-Of the patients who had at least one record of either a HNA or PCSP (`r scales::comma(ids_either)`): - `r scales::percent(percent_only_hna, accuracy = 0.1)` had only a HNA recorded (`r scales::comma(only_hna)`) - `r scales::percent(percent_only_pcsp, accuracy = 0.1)` had only a PCSP recorded (`r scales::comma(only_pcsp)`) - `r scales::percent(percent_both, accuracy = 0.1)` had both a HNA and PCSP recorded (`r scales::comma(both)`).
+Of the patients who had at least one record of either a HNA or PCSP (`r scales::comma(ids_either)`): - `r scales::percent(percent_only_hna, accuracy = 0.1)` had only a HNA recorded (`r scales::comma(only_hna)`) - `r scales::percent(percent_only_pcsp, accuracy = 0.1)` had only a PCSP recorded (`r scales::comma(only_pcsp)`) - `r scales::percent(percent_both, accuracy = 0.1)` had both a HNA and PCSP recorded (`r scales::comma(both)`). The figure below shows the statuses associated with first HNAs and PCSPs, amongst those patients who have a record of both.
+
+###### Figure 6a: Proportion of patients offered both a HNA and PCSP within 2 years of diagnosis, for those diagnosed in 2021, by the status of their first record 
+
+```{r offered_code_matrix, out.width='100%', fig.align='center'}
+
+offered_code_matrix_plot
+```
 
 Most patients with both a HNA and PCSP recorded had their PCSP recorded on the same day as their first HNA (78.9%). Over 85% of these patients had their PCSP within a week of their first HNA record.
 

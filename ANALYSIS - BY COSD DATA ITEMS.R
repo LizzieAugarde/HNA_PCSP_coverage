@@ -9,36 +9,37 @@
 library(scales)
 
 ###### Offered code ######
-offered_code_data <- hna_pcsp_data %>%
-  filter(offered_code != "04") %>% #excluding records which are "Not offered"
-  filter(offered_code != "" & offered_code != "08/03/2023" & offered_code != "16/06/2023") %>%
-  mutate(offered_code = ifelse(offered_code == "001", "01", offered_code)) %>%
-  group_by(event_type, offered_code) %>%
-  summarise(count = n()) %>%
-  group_by(event_type) %>%
+offered_code_data <- hna_pcsp_data |>
+  filter(offered_code != "04") |> #excluding records which are "Not offered"
+  filter(offered_code != "" & offered_code != "08/03/2023" & offered_code != "16/06/2023") |>
+  mutate(offered_code = ifelse(offered_code == "001", "01", offered_code)) |>
+  group_by(event_type, offered_code) |>
+  summarise(count = n()) |>
+  group_by(event_type) |>
   mutate(total_count = sum(count),
          percent = percent((count/total_count), accuracy = 0.1),
-         percent_graph = (count/total_count)*100) %>%
-  ungroup() %>%
+         percent_graph = (count/total_count)*100) |>
+  ungroup() |>
   mutate(event_type = ifelse(event_type == 20, "HNA", "PCSP"),
          offered_code_desc = case_when(offered_code == "01" ~ "Offered and undecided", 
                                        offered_code == "02" ~ "Offered and declined", 
                                        offered_code == "03" ~ "Offered and accepted", 
                                        offered_code == "05" ~ "Offered but patient unable to complete", 
                                        offered_code == "06" ~ "Not required (no concerns from HNA)",
-                                       TRUE ~ "Not known")) 
+                                       TRUE ~ "Not known"))
+  
 
 ###### Staff role ######
-staff_role_data <- hna_pcsp_data %>%
-  filter(offered_code != "04") %>% #excluding records which are "Not offered"
-  filter(staff_role != "" & staff_role != "EH") %>%
-  group_by(event_type, staff_role) %>%
-  summarise(count = n()) %>%
-  group_by(event_type) %>%
+staff_role_data <- hna_pcsp_data |>
+  filter(offered_code != "04") |> #excluding records which are "Not offered"
+  filter(staff_role != "" & staff_role != "EH") |>
+  group_by(event_type, staff_role) |>
+  summarise(count = n()) |>
+  group_by(event_type) |>
   mutate(total_count = sum(count),
          percent = percent((count/total_count), accuracy = 0.1),
-         percent_graph = (count/total_count)*100) %>%
-  ungroup() %>%
+         percent_graph = (count/total_count)*100) |>
+  ungroup() |>
   mutate(event_type = ifelse(event_type == 20, "HNA", "PCSP"),
          staff_role_desc = case_when(staff_role == "01" ~ "CNS", 
                                      staff_role == "02" ~ "Other nurse", 
@@ -51,17 +52,17 @@ staff_role_data <- hna_pcsp_data %>%
 
 
 ###### Point of pathway variable ######
-pathway_data <- hna_pcsp_data %>%
-  filter(offered_code != "04") %>% #excluding records which are "Not offered"
-  filter(point_of_pathway != "" & point_of_pathway != "09") %>%
-  mutate(point_of_pathway = ifelse(point_of_pathway %in% c("98", "99"), "97", point_of_pathway)) %>%
-  group_by(event_type, point_of_pathway) %>%
-  summarise(count = n()) %>%
-  group_by(event_type) %>%
+pathway_data <- hna_pcsp_data |>
+  filter(offered_code != "04") |> #excluding records which are "Not offered"
+  filter(point_of_pathway != "" & point_of_pathway != "09") |>
+  mutate(point_of_pathway = ifelse(point_of_pathway %in% c("98", "99"), "97", point_of_pathway)) |>
+  group_by(event_type, point_of_pathway) |>
+  summarise(count = n()) |>
+  group_by(event_type) |>
   mutate(total_count = sum(count),
          percent = percent((count/total_count), accuracy = 0.1),
-         percent_graph = (count/total_count)*100) %>%
-  ungroup() %>%
+         percent_graph = (count/total_count)*100) |>
+  ungroup() |>
   mutate(event_type = ifelse(event_type == 20, "HNA", "PCSP"),
          point_of_pathway_desc = case_when(point_of_pathway == "01" ~ "Initial cancer diagnosis", 
                                            point_of_pathway == "02" ~ "Start of treatment", 

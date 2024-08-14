@@ -41,6 +41,37 @@ time_between <- patient_level_data |>
 
 median_time_between <- median(time_between$hna_pcsp_diff)
 
+###### RELATIONSHIP BETWEEN HNA AND PCSP STATUS ######
+offered_code_matrix <- patient_level_data |> 
+  select(patientid, hna_offered_code, pcsp_offered_code) |>
+  filter(!is.na(hna_offered_code), !is.na(pcsp_offered_code)) |>
+  mutate(hna_offered_code_desc = case_when(hna_offered_code == "01" ~ "Offered and undecided", 
+                                           hna_offered_code == "02" ~ "Offered and declined", 
+                                           hna_offered_code == "03" ~ "Offered and accepted", 
+                                           hna_offered_code == "05" ~ "Offered but patient unable to complete", 
+                                           TRUE ~ "Not known"), 
+         pcsp_offered_code_desc = case_when(pcsp_offered_code == "01" ~ "Offered and undecided", 
+                                            pcsp_offered_code == "02" ~ "Offered and declined", 
+                                            pcsp_offered_code == "03" ~ "Offered and accepted", 
+                                            pcsp_offered_code == "05" ~ "Offered but patient unable to complete", 
+                                            pcsp_offered_code == "06" ~ "Not required (no concerns from HNA)",
+                                            TRUE ~ "Not known"))  |>
+  count(hna_offered_code_desc, pcsp_offered_code_desc)  |>
+  mutate(proportion = (n/sum(n))*100)
+
+offered_code_matrix_plot <- ggplot(offered_code_matrix, aes(x = pcsp_offered_code_desc, 
+                                                            y = hna_offered_code_desc, 
+                                                            fill = proportion)) +
+  geom_tile(color = "black") +
+  scale_fill_gradient(low = "#d2f7dd", high = "#008A26", na.value = "white", 
+                      name = "Proportion of patients") +
+  labs(x = "PCSP status", y = "HNA status") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
 
 
 ###### TIME BETWEEN MULTIPLE HNAs ######
@@ -52,6 +83,7 @@ multi_hnas <- hna_pcsp_data |>
 
 median_multi_hnas <- median(multi_hnas$time_difference)
 multi_hnas_within_week <- (length(which(multi_hnas$time_difference <8))) / nrow(multi_hnas) #HNAs within 1 week of each other
+
 
 ###### TIME BETWEEN MULTIPLE PCSPs ######
 multi_pcsps <- hna_pcsp_data |>
