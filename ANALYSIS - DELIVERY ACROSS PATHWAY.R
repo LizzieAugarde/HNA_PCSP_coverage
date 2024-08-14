@@ -13,54 +13,64 @@ library(scales)
 patient_level_data <- patient_level_data |> 
   ungroup() |>
   mutate(diag_death_diff = difftime(as.Date(deathdatebest), as.Date(diagnosisdatebest), units = "days")) |>
-  mutate(death_status = ifelse(diag_death_diff <56, "Died within 8 weeks", "Survived at least 8 weeks")) |>
-  mutate(death_status = ifelse(is.na(diag_death_diff), "Survived at least 8 weeks", death_status))
+  mutate(death_status_4wks = ifelse(diag_death_diff <28, "Died", "Survived"),
+         death_status_6wks = ifelse(diag_death_diff <42, "Died", "Survived"),
+         death_status_8wks = ifelse(diag_death_diff <56, "Died", "Survived"),
+         death_status_12wks = ifelse(diag_death_diff <84, "Died", "Survived")) |>
+  mutate(across(starts_with("death_status"), 
+                function(x) ifelse(is.na(x), "Survived", x)))
 
 deaths_hna <- patient_level_data |>
   filter(keepforhna == "INCLUDE") |>
-  group_by(death_status, hna_status) |>
-  summarise(number_patients = n()) |>
-  ungroup() |>
-  group_by(death_status) |>
-  mutate(percent = (number_patients/sum(number_patients))*100,
-         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
-         lower_table = paste0(lower,"%"), 
-         upper_table = paste0(upper, "%")) |>
-  filter(hna_status == "Has HNA") |>
-  ungroup()
+  pivot_longer(cols = starts_with("death_status"), names_to = "time_period", values_to = "death_status") |>
+  group_by(time_period, death_status) |>
+  summarize(total = n(), 
+            number_with_hna = sum(hna_status == "Has HNA"),
+            prop_with_hna = round(mean(hna_status == "Has HNA")*100, 1), 
+            lower = round(prop.test(number_with_hna, total)$conf.int[1]*100, 1),
+            upper = round(prop.test(number_with_hna, total)$conf.int[2]*100, 1)) |>
+  mutate(time_period = case_when(time_period == "death_status_4wks" ~ "4 weeks",
+                                 time_period == "death_status_6wks" ~ "6 weeks",
+                                 time_period == "death_status_8wks" ~ "8 weeks",
+                                 time_period == "death_status_12wks" ~ "12 weeks")) |>
+  mutate(time_period = factor(time_period, levels = c("4 weeks", "6 weeks", "8 weeks", "12 weeks")))
 
-deaths_hna_graph <- ggplot(deaths_hna, aes(x = death_status, y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
-  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
-  labs(x = "Survival status", y = "Proportion of patients offered a HNA") + 
+deaths_hna_graph <- ggplot(deaths_hna, aes(x = time_period, y = prop_with_hna, 
+                                           fill = death_status)) + 
+  geom_bar(stat = "identity", position = "dodge") + 
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1, 
+                position = position_dodge(width = 0.9)) +
+  labs(x = "Time period", y = "Proportion of patients offered a HNA", 
+       fill = "Survival status") + 
   scale_y_continuous(limits = c(0, 100)) +
+  scale_fill_manual(values = c("#008A26", "#02D462")) +
   theme_minimal() 
 
 deaths_pcsp <- patient_level_data |>
-  filter(keepforhna == "INCLUDE") |>
-  group_by(death_status, pcsp_status) |>
-  summarise(number_patients = n()) |>
-  ungroup() |>
-  group_by(death_status) |>
-  mutate(percent = (number_patients/sum(number_patients))*100,
-         percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
-         lower_table = paste0(lower,"%"), 
-         upper_table = paste0(upper, "%")) |>
-  filter(pcsp_status == "Has PCSP") |>
-  ungroup()
+  filter(keepforpcsp == "INCLUDE") |>
+  pivot_longer(cols = starts_with("death_status"), names_to = "time_period", values_to = "death_status") |>
+  group_by(time_period, death_status) |>
+  summarize(total = n(), 
+            number_with_pcsp = sum(pcsp_status == "Has PCSP"),
+            prop_with_pcsp = round(mean(pcsp_status == "Has PCSP")*100, 1), 
+            lower = round(prop.test(number_with_pcsp, total)$conf.int[1]*100, 1),
+            upper = round(prop.test(number_with_pcsp, total)$conf.int[2]*100, 1)) |>
+  mutate(time_period = case_when(time_period == "death_status_4wks" ~ "4 weeks",
+                                 time_period == "death_status_6wks" ~ "6 weeks",
+                                 time_period == "death_status_8wks" ~ "8 weeks",
+                                 time_period == "death_status_12wks" ~ "12 weeks")) |>
+  mutate(time_period= factor(time_period, levels = c("4 weeks", "6 weeks", "8 weeks", "12 weeks")))
 
-deaths_pcsp_graph <- ggplot(deaths_pcsp, aes(x = death_status, y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
-  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
-  labs(x = "Survival status", y = "Proportion of patients offered a PCSP") + 
+deaths_pcsp_graph <- ggplot(deaths_pcsp, aes(x = time_period, y = prop_with_pcsp, 
+                                           fill = death_status)) + 
+  geom_bar(stat = "identity", position = "dodge") + 
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1, 
+                position = position_dodge(width = 0.9)) +
+  labs(x = "Time period", y = "Proportion of patients offered a PCSP", 
+       fill = "Survival status") + 
   scale_y_continuous(limits = c(0, 100)) +
-  theme_minimal()
+  scale_fill_manual(values = c("#008A26", "#02D462")) +
+  theme_minimal() 
 
 
 ####### RELATIONSHIP TO DIAGNOSIS DATE ######

@@ -163,7 +163,18 @@ COSD collects the 'point in pathway' when a HNA/PCSP is delivered. This is defin
 
 ###### Figure 7b: Proportion of HNA and PCSP records with each point of pathway code, all unique records for patients diagnosed in 2021, excluding those recorded as 'not offered'
 
-```{r point_in_pathway, out.width='100%', fig.align='center'}  pathway_data <- pathway_data |>   select(-c(count, total_count, percent_graph)) |>   pivot_wider(names_from = "event_type", values_from = "percent")   kable(pathway_data, align = "llcc", col.names = c("Point in pathway code",                                                   "Point in pathway",                                                    "Proportion of HNAs",                                                    "Proportion of PCSPs")) |>   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center")   pathway_graph}
+```{r point_in_pathway, out.width='100%', fig.align='center'}
+
+pathway_data <- pathway_data |>   
+  select(-c(count, total_count, percent_graph)) |>   
+  pivot_wider(names_from = "event_type", values_from = "percent")   
+
+kable(pathway_data, align = "llcc", 
+      col.names = c("Point in pathway code",                                                           "Point in pathway",                                                                "Proportion of HNAs",                                                              "Proportion of PCSPs")) |>   
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = F, font_size = 12, position = "center")   
+
+pathway_graph   
 ```
 
 \
@@ -173,12 +184,16 @@ The median time between diagnosis date and first recorded HNA is `r median_hna_d
 
 ###### Figure 7c: Number of patients by time between diagnosis date and first recorded HNA of patients diagnosed in 2021
 
-```{r hna_diag_date, out.width='100%', fig.align='center'}  hna_hist}
+```{r hna_diag_date, out.width='100%', fig.align='center'}
+
+hna_hist
 ```
 
 ###### Figure 7d: Number of patients by time between diagnosis date and first recorded PCSP of patients diagnosed in 2021
 
-```{r pcsp_diag_date, out.width='100%', fig.align='center'}  pcsp_hist}
+```{r pcsp_diag_date, out.width='100%', fig.align='center'}
+
+pcsp_hist
 ```
 
 Multiple HNAs and PCSPs:
@@ -195,7 +210,10 @@ count_summary_Figure <- count_summary_Figure |>
   rename("PCSPs" = "percent_patients_pcsp") |>   
   select(-c(number_patients_hna, number_patients_pcsp))   
 
-kable(count_summary_Figure, align = "lcc") |>   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") |>   add_header_above(c(" " = 1, "Proportion of patients" = 2))
+kable(count_summary_Figure, align = "lcc") |>   
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = F, font_size = 12, position = "center") |>
+  add_header_above(c(" " = 1, "Proportion of patients" = 2))
 ```
 
 \
@@ -206,29 +224,50 @@ The median time between multiple PCSPs is `r median_multi_pcsps` days. `r scales
 \
 Deaths:
 
-###### Figure 7e: Proportion of patients diagnosed in 2021 receiving a HNA in the two years post-diagnosis, by survival status
+###### Figure 7e: Proportion of patients diagnosed in 2021 offered a HNA in the two years post-diagnosis, by survival status
 
 ```{r hna_deaths, out.width='100%', fig.align='center'}
 
-deaths_hna |> select(-lower, -upper, -percent, -hna_status) |>
+deaths_hna |> 
+  select(-total) |>
+  mutate(prop_with_hna = paste0(prop_with_hna, "%"), 
+         lower = paste0(lower, "%"),
+         upper =  paste0(upper, "%")) |>
+  arrange(time_period) |>
   kable(format.args = list(big.mark = ","), align = "llcccc", 
-        col.names = c("Survival status", "Number of patients", "Proportion of patients", 
-                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
+        col.names = c("Time period", 
+                      "Survival status", 
+                      "Number of patients", 
+                      "Proportion of patients", 
+                      "Lower 95% confidence limit", 
+                      "Upper 95% confidence limit")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = F, font_size = 12, position = "center") 
 
+deaths_hna_graph
 ```
 
-###### Figure 7f: Proportion of patients diagnosed in 2021 receiving a PCSP in the two years post-diagnosis, by survival status
+###### Figure 7f: Proportion of patients diagnosed in 2021 offered a PCSP in the two years post-diagnosis, by survival status
 
 ```{r pcsp_deaths, out.width='100%', fig.align='center'}
 
-deaths_pcsp |> select(-lower, -upper, -percent, -pcsp_status) |>
+deaths_pcsp |> 
+  select(-total) |>
+  mutate(prop_with_pcsp = paste0(prop_with_pcsp, "%"), 
+         lower = paste0(lower, "%"),
+         upper =  paste0(upper, "%")) |>
+  arrange(time_period) |>
   kable(format.args = list(big.mark = ","), align = "llcccc", 
-        col.names = c("Survival status", "Number of patients", "Proportion of patients", 
-                      "Lower 95% confidence limit", "Upper 95% confidence limit")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "center") 
+        col.names = c("Time period", 
+                      "Survival status", 
+                      "Number of patients", 
+                      "Proportion of patients", 
+                      "Lower 95% confidence limit", 
+                      "Upper 95% confidence limit")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = F, font_size = 12, position = "center") 
 
-grid.arrange(deaths_hna_graph, deaths_pcsp_graph, ncol = 2)
+deaths_pcsp_graph
 ```
 
 ## 8. Staff roles
