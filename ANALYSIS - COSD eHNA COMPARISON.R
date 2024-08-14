@@ -36,10 +36,10 @@ hnas_2021_data <- hnas_2021_data |>
   summarise(count = n()) |>
   pivot_wider(names_from = month, values_from = count) |>
   rowwise() |>
-  mutate(total_sum = sum(c_across(where(is.numeric)))) |>
+  mutate(cosd_total = sum(c_across(where(is.numeric)))) |>
   ungroup() |>
-  select(trust_code, total_sum) |>
-  filter(!is.na(total_sum))
+  select(trust_code, cosd_total) |>
+  filter(!is.na(cosd_total))
 
 #eHNA data
 ehna_data <- read.csv("N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/eHNA_data_2021-limited.csv")
@@ -49,31 +49,43 @@ ehna_data <- ehna_data |>
   rename_with(~ gsub("\\.21", "", .)) |>
   rename("diag_trust" = "ODS") |>
   rowwise() |>
-  mutate(total_sum = sum(c_across(where(is.numeric)))) |>
+  mutate(ehna_total = sum(c_across(where(is.numeric)))) |>
   ungroup() |>
-  select(diag_trust, total_sum) |>
-  filter(!is.na(total_sum), diag_trust != "England")
+  select(diag_trust, ehna_total) |>
+  filter(!is.na(ehna_total), diag_trust != "England")
+
+
+#number of trusts missing in each dataset 
+not_in_ehna <- setdiff(hnas_2021_data$trust_code, ehna_data$diag_trust)
+not_in_cosd <- setdiff(ehna_data$diag_trust, hnas_2021_data$trust_code)
 
 
 #merging and comparing the two datasets 
-merged_data <- inner_join(hnas_2021_data, ehna_data, by = c("trust_code" = "diag_trust"))
-
-merged_data <- merged_data |> 
-  mutate(difference = total_sum.x-total_sum.y) 
+merged_data <- full_join(hnas_2021_data, ehna_data, 
+                         by = c("trust_code" = "diag_trust")) |>
+  mutate(difference = cosd_total-ehna_total,
+         status = case_when((is.na(ehna_total) & cosd_total > 0) ~ "In COSD, not in eHNA",
+                            (is.na(cosd_total) & ehna_total > 0) ~ "In eHNA, not in COSD",
+                            (cosd_total > 0 & ehna_total > 0) ~ "In both"),
+         ehna_total = ifelse(is.na(ehna_total), 0, ehna_total),
+         cosd_total = ifelse(is.na(cosd_total), 0, cosd_total))
+        
 
 more_in_cosd <- length(which(merged_data$difference > 0))
 more_in_ehna <- length(which(merged_data$difference < 0))
 
-#trusts missing in each dataset 
-not_in_ehna <- setdiff(hnas_2021_data$trust_code, ehna_data$diag_trust) #46 trusts
-not_in_cosd <- setdiff(ehna_data$diag_trust, hnas_2021_data$trust_code) #40 trusts
 
-#graph of differences between COSD and eHNA numbers of HNAs
-differences_graph <- ggplot(merged_data, 
-                            aes(x = reorder(trust_code, difference), y = difference)) +
-  geom_bar(stat = "identity") + 
+#scatterplot of the number of records in COSD and eHNA by trust
+ehna_cosd_comparison_graph <- ggplot(merged_data, 
+                                     aes(x = ehna_total, y = cosd_total, 
+                                         color = status)) +
+  geom_point(stat = "identity", size = 3) + 
   theme_minimal() +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()) + 
-  labs(x = "Trust", y = "Difference in number of HNAs\n(COSD minus eHNA)")
+  scale_color_manual(values = c("#008A26", "#02D462", "#03fca5")) +
+  scale_x_continuous(labels = label_comma()) +
+  scale_y_continuous(labels = label_comma()) +
+  labs(x = "Number of records in Macmillan eHNA", 
+       y = "Number of records in COSD", 
+       color = "Trust status in each dataset")
 
   

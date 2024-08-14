@@ -90,10 +90,8 @@ query <- "select * from (
   tum.diagnosisdatebest,
   rp.event_type,
   rp.event_property_1,
-  rp.event_property_2,
-  rp.event_property_3,
   rp.event_date,
-  rp.event_end,
+  rp.trust_code,
   rank () over (partition by pat.patientid order by tum.diagnosisdatebest, tum.tumourid asc) as rank
   from av2021.at_patient_england@casref01 pat 
   left join av2021.at_tumour_england@casref01 tum on pat.patientid = tum.patientid
