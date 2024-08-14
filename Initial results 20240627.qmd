@@ -362,7 +362,20 @@ patient_level_data |>
   mutate(gender = ifelse(gender == 1, "Male", "Female")) |>
   kable(align = "lc", 
         col.names = c("Gender", "Median number of days")) |>
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = F, font_size = 12, position = "left") 
+```
+
+######   Figure 9av: Proportion of patients diagnosed in 2021 with only an offer of a HNA and no PCSP records within 2 years of diagnosis, by gender
+
+```{r hna_only_gender, out.width='100%', fig.align='center'}
+
+gender_full_status |>
+  select(gender, percent) |>
+  kable(align = "lc", 
+        col.names = c("Gender", "Proportion of patients")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = F, font_size = 12, position = "left") 
 ```
 
 ## 9b. Variation in coverage - age
@@ -422,7 +435,20 @@ patient_level_data |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
 ```
 
-## 9c. Variation in coverage - ethnicity
+######    Figure 9bv: Proportion of patients diagnosed in 2021 with only an offer of a HNA and no PCSP records within 2 years of diagnosis, by age
+
+```{r hna_only_age, out.width='100%', fig.align='center'}
+
+age_full_status |>   
+  select(age_group, percent) |>   
+  kable(align = "lc",          
+        col.names = c("Age group", "Proportion of patients")) |>   
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),                  full_width = F, font_size = 12, position = "left") 
+```
+
+## 
+
+##  9c. Variation in coverage - ethnicity
 
 ###### Figure 9ci: Proportion of patients diagnosed in 2021 receiving a HNA in the two years post-diagnosis, by ethnicity
 
@@ -482,6 +508,17 @@ patient_level_data |>
   kable(align = "lc",                   
         col.names = c("Ethnicity", "Median number of days")) |>      
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
+```
+
+######   Figure 9cv: Proportion of patients diagnosed in 2021 with only an offer of a HNA and no PCSP records within 2 years of diagnosis, by gender
+
+```{r hna_only_ethnicity, out.width='100%', fig.align='center'}
+
+ethnicity_full_status |>   
+  select(ethnicity_group, percent) |>   
+  kable(align = "lc",          
+        col.names = c("Ethnicity", "Proportion of patients")) |>   
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),                  full_width = F, font_size = 12, position = "left") 
 ```
 
 ## 9d. Variation in coverage - deprivation
@@ -546,6 +583,19 @@ patient_level_data |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
 ```
 
+###### Figure 9dv: Proportion of patients diagnosed in 2021 with only an offer of a HNA and no PCSP records within 2 years of diagnosis, by deprivation decile
+
+```{r hna_only_imd, out.width='100%', fig.align='center'}
+
+imd_full_status |>      
+  select(imd19_decile_lsoas, percent) |>      
+  kable(align = "lc",                   
+        col.names = c("Deprivation decile", "Proportion of patients")) |>      
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),                  full_width = F, font_size = 12, position = "left") 
+```
+
+## 
+
 ## 9e. Variation in coverage - tumour type
 
 ###### Figure 9ei: Proportion of patients diagnosed in 2021 receiving a HNA in the two years post-diagnosis, by tumour type
@@ -608,6 +658,21 @@ patient_level_data |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
 ```
 
+## 
+
+###### Figure 9ev: Proportion of patients diagnosed in 2021 with only an offer of a HNA and no PCSP records within 2 years of diagnosis, by tumour type
+
+```{r hna_only_site, out.width='100%', fig.align='center'}
+
+site_full_status |>         
+  select(ndrs_main, percent) |>         
+  kable(align = "lc",                            
+        col.names = c("Tumour type", "Proportion of patients")) |>         
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),                  full_width = F, font_size = 12, position = "left") 
+```
+
+## 
+
 ## 9f. Variation in coverage - stage at diagnosis
 
 ###### Figure 9fi: Proportion of patients diagnosed in 2021 receiving a HNA in the two years post-diagnosis, by stage at diagnosis
@@ -655,7 +720,7 @@ patient_level_data |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
 ```
 
-###### Figure 9fiv: Median time from diagnosis to first PCSP for patients diagnosed in 2021, by stage at diagnosis
+######    Figure 9fiv: Median time from diagnosis to first PCSP for patients diagnosed in 2021, by stage at diagnosis
 
 ```{r median_pcsp_stage, out.width='100%', fig.align='left'}
 
@@ -667,6 +732,21 @@ patient_level_data |>
         col.names = c("Stage at diagnosis", "Median number of days")) |>      
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, font_size = 12, position = "left") 
 ```
+
+## 
+
+###### Figure 9fv: Proportion of patients diagnosed in 2021 with only an offer of a HNA and no PCSP records within 2 years of diagnosis, by tumour type
+
+```{r hna_only_site, out.width='100%', fig.align='center'}
+
+stage_full_status |>            
+  select(STAGE, percent) |>            
+  kable(align = "lc",                                    
+        col.names = c("Stage at diagnosis", "Proportion of patients")) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),                  full_width = F, font_size = 12, position = "left") 
+```
+
+## 
 
 ## 9g. Variation in coverage - geography
 

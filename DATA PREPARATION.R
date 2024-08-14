@@ -229,7 +229,7 @@ pcsp_count <- pcsp_data %>%
 
 hna_data <- hna_data %>%
   filter(rank == 1) %>%
-  select(-c(hna, pcsp, event_end, keepforpcsp)) %>%
+  select(-c(hna, pcsp, keepforpcsp)) %>%
   rename("hna_event_type" = "event_type", "hna_point_of_pathway" = "point_of_pathway", "hna_staff_role" = "staff_role", "hna_date" = "event_date", 
          "hna_rank" = "rank", "hna_time_diag_event" = "time_diag_event", "hna_offered_code" = "offered_code")
 

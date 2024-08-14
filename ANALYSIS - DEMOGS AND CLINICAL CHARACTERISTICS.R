@@ -65,6 +65,21 @@ gender_pcsp_graph <- ggplot(gender_pcsp, aes(x = gender, y = percent)) +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 
+#proportions with a HNA and no PCSP
+gender_full_status <- patient_level_data |>
+  mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
+                                 hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
+                                 TRUE ~"Other")) |>
+  group_by(gender, full_status) |>
+  summarise(number_patients = n()) |>
+  ungroup() |>
+  group_by(gender) |>
+  mutate(percent = percent((number_patients/sum(number_patients)), accuracy = 0.1)) |>
+  mutate(gender = ifelse(gender == "1", "Male", "Female")) |>
+  filter(!is.na(gender), full_status == "HNA only")
+
+
+
 ####by age at diag-------------------
 patient_level_data <- patient_level_data |>
   mutate(age_group = case_when(age < 20 ~ "Under 20",
@@ -128,6 +143,20 @@ age_pcsp_graph <- ggplot(age_pcsp,
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 
+#proportions with a HNA and no PCSP
+age_full_status <- patient_level_data |>
+  mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
+                                 hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
+                                 TRUE ~"Other")) |>
+  group_by(age_group, full_status) |>
+  summarise(number_patients = n()) |>
+  ungroup() |>
+  group_by(age_group) |>
+  mutate(percent = percent((number_patients/sum(number_patients)), accuracy = 0.1)) |>
+  filter(!is.na(age_group), full_status == "HNA only")
+
+
+
 ####by ethnicity-------------------
 patient_level_data <- patient_level_data |>
   mutate(ethnicity_group = case_when(ethnicity %in% c("A", "B", "C") ~ "White",
@@ -189,6 +218,20 @@ ethnicity_pcsp_graph <- ggplot(filter(ethnicity_pcsp, ethnicity_pcsp$pcsp_status
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 
+#proportions with a HNA and no PCSP
+ethnicity_full_status <- patient_level_data |>
+  mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
+                                 hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
+                                 TRUE ~"Other")) |>
+  group_by(ethnicity_group, full_status) |>
+  summarise(number_patients = n()) |>
+  ungroup() |>
+  group_by(ethnicity_group) |>
+  mutate(percent = percent((number_patients/sum(number_patients)), accuracy = 0.1)) |>
+  filter(!is.na(ethnicity_group), full_status == "HNA only")
+
+
+
 ####by deprivation-------------------
 imd_hna <- patient_level_data |>
   filter(keepforhna == "INCLUDE") |>
@@ -247,6 +290,20 @@ imd_pcsp_graph <- ggplot(imd_pcsp,
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 
+#proportions with a HNA and no PCSP
+imd_full_status <- patient_level_data |>
+  mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
+                                 hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
+                                 TRUE ~"Other")) |>
+  group_by(imd19_decile_lsoas, full_status) |>
+  summarise(number_patients = n()) |>
+  ungroup() |>
+  group_by(imd19_decile_lsoas) |>
+  mutate(percent = percent((number_patients/sum(number_patients)), accuracy = 0.1)) |>
+  filter(!is.na(imd19_decile_lsoas), full_status == "HNA only")
+
+
+
 ####by tumour type-----------
 site_hna <- patient_level_data |>
   filter(keepforhna == "INCLUDE", ndrs_main != "to be grouped", ndrs_main != "See skin table") |>
@@ -299,6 +356,19 @@ site_pcsp_graph <- ggplot(site_pcsp,
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 
+#proportions with a HNA and no PCSP
+site_full_status <- patient_level_data |>
+  mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
+                                 hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
+                                 TRUE ~"Other")) |>
+  group_by(ndrs_main, full_status) |>
+  summarise(number_patients = n()) |>
+  ungroup() |>
+  group_by(ndrs_main) |>
+  mutate(percent = percent((number_patients/sum(number_patients)), accuracy = 0.1)) |>
+  filter(!is.na(ndrs_main), full_status == "HNA only")
+
+
 ####by stage------------
 stage_hna <- patient_level_data |>
   filter(keepforhna == "INCLUDE") |>
@@ -349,3 +419,17 @@ stage_pcsp_graph <- ggplot(stage_pcsp,
   scale_y_continuous(limits = c(0, 100)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+
+#proportions with a HNA and no PCSP
+stage_full_status <- patient_level_data |>
+  mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
+                                 hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
+                                 TRUE ~"Other")) |>
+  group_by(STAGE, full_status) |>
+  summarise(number_patients = n()) |>
+  ungroup() |>
+  group_by(STAGE) |>
+  mutate(percent = percent((number_patients/sum(number_patients)), accuracy = 0.1)) |>
+  filter(!is.na(STAGE), full_status == "HNA only")
+

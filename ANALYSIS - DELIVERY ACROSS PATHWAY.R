@@ -112,7 +112,7 @@ median_pcsp_diag_time <- median(patient_level_data$pcsp_time_diag_event, na.rm=T
 
 #time in which 90% of patients with an offer have their HNA/PCSP 
 hnas_90_percent <- patient_level_data |>
-  filter(hna_status == "Has HNA") |>
+  filter(hna_status == "Has HNA", keepforhna == "INCLUDE") |>
   arrange(hna_time_diag_event) |> 
   mutate(cumulative_proportion = cumsum(rep(1/n(), n()))) |> 
   filter(cumulative_proportion >= 0.90) |> 
@@ -120,7 +120,7 @@ hnas_90_percent <- patient_level_data |>
   pull(hna_time_diag_event)
 
 pcsps_90_percent <- patient_level_data |>
-  filter(pcsp_status == "Has PCSP") |>
+  filter(pcsp_status == "Has PCSP", keepforpcsp == "INCLUDE") |>
   arrange(pcsp_time_diag_event) |> 
   mutate(cumulative_proportion = cumsum(rep(1/n(), n()))) |> 
   filter(cumulative_proportion >= 0.90) |> 

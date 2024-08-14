@@ -42,3 +42,26 @@ raw_data_dups_pcsp <- raw_data %>%
 
 write.xlsx(raw_data_dups_hna, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/Dups by trust 20240327.xlsx", sheetName = "HNA")
 write.xlsx(raw_data_dups_pcsp, "N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Results/Dups by trust 20240327.xlsx", sheetName = "PCSP", append = TRUE)
+
+
+
+##### Records within a week of each other at the same trust ######
+hnas_within_week <- hna_pcsp_data |>
+  select(patientid, hna, event_date, trust_code) |>
+  filter(hna == "Y") |>
+  arrange(patientid, trust_code, event_date) |>
+  group_by(patientid, trust_code) |>
+  mutate(days_between_hnas = difftime(event_date, lag(event_date), units = "days")) |>
+  ungroup()
+
+length(which(hnas_within_week$days_between_hnas<8)) ###6% 
+
+pcsps_within_week <- hna_pcsp_data |>
+  select(patientid, pcsp, event_date, trust_code) |>
+  filter(pcsp == "Y") |>
+  arrange(patientid, trust_code, event_date) |>
+  group_by(patientid, trust_code) |>
+  mutate(days_between_pcsps = difftime(event_date, lag(event_date), units = "days")) |>
+  ungroup() 
+
+length(which(pcsps_within_week$days_between_pcsps<8)) ###6% 
