@@ -74,7 +74,8 @@ patient_level_data <- patient_level_data |>
                                age < 60 & age > 49 ~ "50-59",
                                age < 70 & age > 59 ~ "60-69",
                                age < 80 & age > 69 ~ "70-79",
-                               age > 79 ~ "80+", TRUE ~ NA))
+                               age > 79 ~ "80+", TRUE ~ NA)) |>
+  mutate(age_group = relevel(factor(age_group), ref = "Under 20"))
 
 age_hna <- patient_level_data |>
   filter(keepforhna == "INCLUDE") |>
@@ -109,8 +110,7 @@ age_pcsp <- patient_level_data |>
   ungroup() 
 
 age_hna_graph <- ggplot(age_hna, 
-       aes(x = factor(age_group, levels = c("Under 20", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+")),
-           y = percent)) + 
+                        aes(x = age_group, y = percent)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Age at diagnosis", y = "Proportion of patients offered a HNA") + 
@@ -119,8 +119,7 @@ age_hna_graph <- ggplot(age_hna,
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 age_pcsp_graph <- ggplot(age_pcsp,
-       aes(x = factor(age_group, levels = c("Under 20", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+")),
-           y = percent)) + 
+                         aes(x = age_group, y = percent)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Age at diagnosis", y = "Proportion of patients offered a PCSP") + 
@@ -300,7 +299,7 @@ site_pcsp_graph <- ggplot(site_pcsp,
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 
-#by stage------------
+####by stage------------
 stage_hna <- patient_level_data |>
   filter(keepforhna == "INCLUDE") |>
   group_by(STAGE, hna_status) |>
