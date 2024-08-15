@@ -68,11 +68,14 @@ offered_code_matrix_plot <- ggplot(offered_code_matrix, aes(x = pcsp_offered_cod
   labs(x = "PCSP status", y = "HNA status") +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+    axis.text.y = element_text(size = 14),
+    axis.title = element_text(size = 16),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 16),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank()
   )
-
 
 ###### TIME BETWEEN MULTIPLE HNAs ######
 multi_hnas <- hna_pcsp_data |>

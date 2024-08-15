@@ -81,8 +81,8 @@ patient_level_data <- patient_level_data |>
 hna_hist <- ggplot(patient_level_data, aes(x = hna_time_diag_event)) +
   geom_histogram(aes(y = cumsum(..count..)), 
                  binwidth = 10, fill = "#008A26", color = "black") +
-  scale_y_continuous(limits = c(0,75000),
-                     breaks = c(25000,50000,75000), 
+  scale_y_continuous(limits = c(0,81000),
+                     breaks = c(20000,40000, 60000, 80000), 
                      labels = label_comma()) +
   scale_x_continuous(breaks = c(30,42,56,84,183,365,548,730),
                      labels = c("4 weeks", "6 weeks", "8 weeks", "12 weeks",
@@ -94,8 +94,8 @@ hna_hist <- ggplot(patient_level_data, aes(x = hna_time_diag_event)) +
 pcsp_hist <- ggplot(patient_level_data, aes(x = pcsp_time_diag_event)) +
   geom_histogram(aes(y = cumsum(..count..)), 
                      binwidth = 10, fill = "#008A26", color = "black") +
-  scale_y_continuous(limits = c(0,75000),
-                     breaks = c(25000,50000,75000), 
+  scale_y_continuous(limits = c(0,81000),
+                     breaks = c(20000,40000, 60000, 80000), 
                      labels = label_comma()) +
   scale_x_continuous(breaks = c(30,42,56,84,183,365,548,730),
                      labels = c("4 weeks", "6 weeks", "8 weeks", "12 weeks",

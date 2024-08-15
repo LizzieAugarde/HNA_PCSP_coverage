@@ -90,7 +90,9 @@ patient_level_data <- patient_level_data |>
                                age < 70 & age > 59 ~ "60-69",
                                age < 80 & age > 69 ~ "70-79",
                                age > 79 ~ "80+", TRUE ~ NA)) |>
-  mutate(age_group = relevel(factor(age_group), ref = "Under 20"))
+  mutate(age_group = factor(age_group, levels = c("Under 20", "20-29", "30-39", 
+                                                  "40-49", "50-59", "60-69", 
+                                                  "70-79", "80+")))
 
 age_hna <- patient_level_data |>
   filter(keepforhna == "INCLUDE") |>
@@ -210,7 +212,7 @@ ethnicity_hna_graph <- ggplot(ethnicity_hna,
 
 ethnicity_pcsp_graph <- ggplot(filter(ethnicity_pcsp, ethnicity_pcsp$pcsp_status == "Has PCSP"), 
                                aes(x = ethnicity_group, y = percent)) + 
-  geom_bar(stat = "identity", position = "dodge", fill = "lightblue") + 
+  geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
   labs(x = "Ethnicity", y = "Percentage of patients offered a PCSP") + 
   scale_y_continuous(limits = c(0, 100)) +
@@ -358,6 +360,7 @@ site_pcsp_graph <- ggplot(site_pcsp,
 
 #proportions with a HNA and no PCSP
 site_full_status <- patient_level_data |>
+  filter(ndrs_main != "to be grouped", ndrs_main != "See skin table") |>
   mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
                                  hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
                                  TRUE ~"Other")) |>
