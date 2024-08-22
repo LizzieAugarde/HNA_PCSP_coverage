@@ -67,6 +67,7 @@ gender_pcsp_graph <- ggplot(gender_pcsp, aes(x = gender, y = percent)) +
 
 #proportions with a HNA and no PCSP
 gender_full_status <- patient_level_data |>
+  filter(hna_offered_code == "03") |>
   mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
                                  hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
                                  TRUE ~"Other")) |>
@@ -147,6 +148,7 @@ age_pcsp_graph <- ggplot(age_pcsp,
 
 #proportions with a HNA and no PCSP
 age_full_status <- patient_level_data |>
+  filter(hna_offered_code == "03") |>
   mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
                                  hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
                                  TRUE ~"Other")) |>
@@ -222,6 +224,7 @@ ethnicity_pcsp_graph <- ggplot(filter(ethnicity_pcsp, ethnicity_pcsp$pcsp_status
 
 #proportions with a HNA and no PCSP
 ethnicity_full_status <- patient_level_data |>
+  filter(hna_offered_code == "03") |>
   mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
                                  hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
                                  TRUE ~"Other")) |>
@@ -294,6 +297,7 @@ imd_pcsp_graph <- ggplot(imd_pcsp,
 
 #proportions with a HNA and no PCSP
 imd_full_status <- patient_level_data |>
+  filter(hna_offered_code == "03") |>
   mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
                                  hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
                                  TRUE ~"Other")) |>
@@ -361,6 +365,7 @@ site_pcsp_graph <- ggplot(site_pcsp,
 #proportions with a HNA and no PCSP
 site_full_status <- patient_level_data |>
   filter(ndrs_main != "to be grouped", ndrs_main != "See skin table") |>
+  filter(hna_offered_code == "03") |>
   mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
                                  hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
                                  TRUE ~"Other")) |>
@@ -426,6 +431,7 @@ stage_pcsp_graph <- ggplot(stage_pcsp,
 
 #proportions with a HNA and no PCSP
 stage_full_status <- patient_level_data |>
+  filter(hna_offered_code == "03") |>
   mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
                                  hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
                                  TRUE ~"Other")) |>
