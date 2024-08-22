@@ -63,6 +63,7 @@ offered_code_matrix_plot <- ggplot(offered_code_matrix, aes(x = pcsp_offered_cod
                                                             y = hna_offered_code_desc, 
                                                             fill = proportion)) +
   geom_tile(color = "black") +
+  geom_text(aes(label = paste0(round(proportion, digits = 1), "%"))) +
   scale_fill_gradient(low = "#d2f7dd", high = "#008A26", na.value = "white", 
                       name = "Proportion of patients") +
   labs(x = "PCSP status", y = "HNA status") +
