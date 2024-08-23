@@ -215,7 +215,6 @@ Of the patients who had at least one record of either a HNA or PCSP (`r scales::
 
 ![](N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/HNA PCSP coverage analysis/offered_code_matrix_plot.jpeg)\
 \
-Most patients with both a HNA and PCSP recorded had their PCSP recorded on the same day as their first HNA (78.9%). Over 85% of these patients had their PCSP within a week of their first HNA record.
 
 There are various reasons why this analysis appears to show lower than expected coverage of HNAs and PCSPs from the data available:
 
