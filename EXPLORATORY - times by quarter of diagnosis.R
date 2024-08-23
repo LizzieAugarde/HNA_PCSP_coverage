@@ -80,3 +80,12 @@ median_time <- patient_level_data |>
   group_by(quarter) |>
   summarise(median_time_hna = median(hna_time_diag_event, na.rm=TRUE),
             median_time_pcsp = median(pcsp_time_diag_event, na.rm=TRUE))
+
+mean_time <- patient_level_data |>
+  group_by(quarter) |>
+  summarise(mean_time_hna = mean(hna_time_diag_event, na.rm=TRUE),
+            mean_time_pcsp = mean(pcsp_time_diag_event, na.rm=TRUE))
+
+patient_level_data |>
+  summarise(mean_time_hna = mean(hna_time_diag_event, na.rm=TRUE),
+            mean_time_pcsp = mean(pcsp_time_diag_event, na.rm=TRUE))
