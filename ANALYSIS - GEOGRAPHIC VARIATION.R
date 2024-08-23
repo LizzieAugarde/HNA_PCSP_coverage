@@ -1,23 +1,22 @@
 ################ HNA/PCSP coverage analysis - geographic variation ###################
 
-#Analysis for proposal aim XXXX - proportion of people being offered an HNA/PCSP by 
-#diagnosis trust
+#Analysis of the proportion of patients being offered an HNA/PCSP by trust of diagnosis
+#Used in Section 9g of initial results slide deck 
 
 #Created July 2024 by Lizzie Augarde 
-#Change log:
 #################################################################################
 
-####HNA coverage categories-------------------
+############# HNA COVERAGE CATEGORISATION #############
 trust_hna <- patient_level_data |>
   filter(keepforhna == "INCLUDE") |>
-  group_by(diag_trust, hna_status) |>
+  group_by(diag_trust, hna_status) |> #aggregating to trust level
   summarise(number_patients = n()) |>
   ungroup() |>
   group_by(diag_trust) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1)) |>
   filter(!is.na(diag_trust)) |>
-  mutate(percent_group = case_when(percent <10 ~ "Less than 10%",
+  mutate(percent_group = case_when(percent <10 ~ "Less than 10%", #grouping
                                    percent >=10 & percent <20 ~ "10% - 20%",
                                    percent >=20 & percent <30 ~ "20% - 30%",
                                    percent >=30 & percent <40 ~ "30% - 40%",
@@ -28,12 +27,14 @@ trust_hna <- patient_level_data |>
                                    percent >=80 & percent <90 ~ "80% - 90%",
                                    percent >=90 & percent <100 ~ "90% - 100%"))
 
+#number of trusts with each % coverage
 trust_coverage_hna_cats <- trust_hna |> 
   group_by(percent_group) |>
   summarise(trust_count = n()) |>
   mutate(percent_group = fct_relevel(percent_group, "Less than 10%")) |>
   arrange(percent_group)
 
+#bar graph of the number of trusts with each % coverage of HNAs
 trust_hna_graph <- ggplot(trust_coverage_hna_cats, aes(x = percent_group, y = trust_count)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "#008D26") + 
   labs(x = "Proportion of patients offered a HNA", y = "Number of trusts") + 
@@ -41,17 +42,17 @@ trust_hna_graph <- ggplot(trust_coverage_hna_cats, aes(x = percent_group, y = tr
   theme(axis.text.x = element_text(angle = 45, hjust=1))    
 
 
-####PCSP coverage categories-------------------
+############# PCSP COVERAGE CATEGORISATION #############
 trust_pcsp <- patient_level_data |>
   filter(keepforpcsp == "INCLUDE") |>
-  group_by(diag_trust, pcsp_status) |>
+  group_by(diag_trust, pcsp_status) |> #aggregating to trust level
   summarise(number_patients = n()) |>
   ungroup() |>
   group_by(diag_trust) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1)) |>
   filter(!is.na(diag_trust)) |>
-  mutate(percent_group = case_when(percent <10 ~ "Less than 10%",
+  mutate(percent_group = case_when(percent <10 ~ "Less than 10%", #grouping
                                    percent >=10 & percent <20 ~ "10% - 20%",
                                    percent >=20 & percent <30 ~ "20% - 30%",
                                    percent >=30 & percent <40 ~ "30% - 40%",
@@ -62,12 +63,14 @@ trust_pcsp <- patient_level_data |>
                                    percent >=80 & percent <90 ~ "80% - 90%",
                                    percent >=90 & percent <100 ~ "90% - 100%"))
 
+#number of trusts with each % coverage
 trust_coverage_pcsp_cats <- trust_pcsp |> 
   group_by(percent_group) |>
   summarise(trust_count = n()) |>
   mutate(percent_group = fct_relevel(percent_group, "Less than 10%")) |>
   arrange(percent_group)
 
+#bar graph of the number of trusts with each % coverage of PCSPs
 trust_pcsp_graph <- ggplot(trust_coverage_pcsp_cats, aes(x = percent_group, y = trust_count)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "#008D26") + 
   labs(x = "Proportion of patients offered a PCSP", y = "Number of trusts") + 
@@ -75,20 +78,20 @@ trust_pcsp_graph <- ggplot(trust_coverage_pcsp_cats, aes(x = percent_group, y = 
   theme(axis.text.x = element_text(angle = 45, hjust=1))  
 
 
-####HNA coverage map by CA-------
-library(sf)
-library(tmap)
-
+############# COVERAGE BY ICB #############
+#query to aggregate to ICB level
 query <- "select a.tumourid,
                  b.icb_2022_name,
                  b.icb_2022_code
           from analysiselizabethaugarde.hna_pcsps_patient_cohort@casref01 a
           left join av2021.at_geography_england@casref01 b on a.tumourid = b.tumourid"
 
-patients_geog <- dbGetQueryOracle(cas2406, query, rowlimit = NA)
+patients_geog <- dbGetQueryOracle(cas2407, query, rowlimit = NA)
 
+#joining patient data with ICB 
 patients_geog <- left_join(patients_geog, patient_level_data, by = c("TUMOURID" = "tumourid"))
 
+#aggregating HNA coverage to ICB level
 icb_coverage_hna <- patients_geog |>
   filter(keepforhna == "INCLUDE") |>
   group_by(ICB_2022_CODE, hna_status) |>
@@ -116,6 +119,7 @@ icb_coverage_hna <- patients_geog |>
                                                           "90% - 100%"))) |>
   ungroup()
 
+#aggregating PCSP coverage to ICB level
 icb_coverage_pcsp <- patients_geog |>
   filter(keepforpcsp == "INCLUDE") |>
   group_by(ICB_2022_CODE, pcsp_status) |>
@@ -143,17 +147,25 @@ icb_coverage_pcsp <- patients_geog |>
                                                           "90% - 100%"))) |>
   ungroup()
 
-#maps
+
+############# MAPS OF COVERAGE BY ICB #############
+library(sf)
+library(tmap)
+
+#read in boundaries
 icbs <- read_sf("N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/ICB_JUL_2022_EN_BFC_V2.shp")
 
+#joining boundary to data 
 icbs_hna <- left_join(icbs, icb_coverage_hna, by = c("ICB22CD" = "ICB_2022_CODE"))
 icbs_pcsp <- left_join(icbs, icb_coverage_pcsp, by = c("ICB22CD" = "ICB_2022_CODE"))
 
+#HNA coverage map and save
 hna_map <- tm_shape(icbs_hna) +
   tm_polygons("percent_group", title = "HNA coverage", palette = "Greens")
 
 tmap_save(hna_map, filename = "hna_map.jpeg", dpi = 300, width = 8, height = 6, units = "in")
 
+#PCSP coverage map and save
 pcsp_map <- tm_shape(icbs_pcsp) +
   tm_polygons("percent_group", title = "PCSP coverage", palette = "Greens")
 

@@ -1,14 +1,13 @@
 ################ HNA/PCSP coverage analysis - coverage by characteristics ###################
 
-#Analysis for proposal aim XXXX - proportion of people being offered an HNA/PCSP by 
+#Analysis for proposal aim 5 - proportion of people being offered an HNA/PCSP by 
 #demographic and clinical characteristics 
+#Used in Section 9 of initial results slide deck
 
 #Created April 2024 by Lizzie Augarde 
-#Change log:
 ##########################################################################################
 
 
-###### DEMOGRAPHICS (POST-DEDUPLICATION) ######
 patient_level_data <- patient_level_data |>
   mutate(hna_status = ifelse(hna_count != "0", "Has HNA", "No HNA"),
          pcsp_status = ifelse(pcsp_count != "0", "Has PCSP", "No PCSP"))
