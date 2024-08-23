@@ -15,7 +15,7 @@ trust_hna <- patient_level_data |>
   group_by(diag_trust) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1)) |>
-  filter(!is.na(diag_trust)) |>
+  filter(!is.na(diag_trust), hna_status == "Has HNA") |>
   mutate(percent_group = case_when(percent <10 ~ "Less than 10%", #grouping
                                    percent >=10 & percent <20 ~ "10% - 20%",
                                    percent >=20 & percent <30 ~ "20% - 30%",
@@ -31,6 +31,8 @@ trust_hna <- patient_level_data |>
 trust_coverage_hna_cats <- trust_hna |> 
   group_by(percent_group) |>
   summarise(trust_count = n()) |>
+  add_row(percent_group = "70% - 80%", trust_count = 0) |> #adding a row for completeness
+  add_row(percent_group = "90% - 100%", trust_count = 0) |> #adding a row for completeness
   mutate(percent_group = fct_relevel(percent_group, "Less than 10%")) |>
   arrange(percent_group)
 
@@ -51,7 +53,7 @@ trust_pcsp <- patient_level_data |>
   group_by(diag_trust) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1)) |>
-  filter(!is.na(diag_trust)) |>
+  filter(!is.na(diag_trust), pcsp_status == "Has PCSP") |>
   mutate(percent_group = case_when(percent <10 ~ "Less than 10%", #grouping
                                    percent >=10 & percent <20 ~ "10% - 20%",
                                    percent >=20 & percent <30 ~ "20% - 30%",
@@ -67,6 +69,8 @@ trust_pcsp <- patient_level_data |>
 trust_coverage_pcsp_cats <- trust_pcsp |> 
   group_by(percent_group) |>
   summarise(trust_count = n()) |>
+  add_row(percent_group = "80% - 90%", trust_count = 0) |> #adding a row for completeness
+  add_row(percent_group = "90% - 100%", trust_count = 0) |> #adding a row for completeness
   mutate(percent_group = fct_relevel(percent_group, "Less than 10%")) |>
   arrange(percent_group)
 
@@ -86,7 +90,7 @@ query <- "select a.tumourid,
           from analysiselizabethaugarde.hna_pcsps_patient_cohort@casref01 a
           left join av2021.at_geography_england@casref01 b on a.tumourid = b.tumourid"
 
-patients_geog <- dbGetQueryOracle(cas2407, query, rowlimit = NA)
+patients_geog <- dbGetQueryOracle(casref01, query, rowlimit = NA)
 
 #joining patient data with ICB 
 patients_geog <- left_join(patients_geog, patient_level_data, by = c("TUMOURID" = "tumourid"))

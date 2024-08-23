@@ -173,8 +173,6 @@ survival_hna <- patient_level_data |>
   summarize(total = n(), 
             has_hna = sum(hna_status == "Has HNA")) 
 
-survival_hna <- survival_hna |> filter(surv_status == "Survived")
-
 #number of patients dying within each time period and number with a HNA
 deaths_hna <- survival_hna |>
   filter(surv_status == "Died") |>
@@ -191,6 +189,8 @@ deaths_hna <- survival_hna |>
   select(surv_status, time_period, total, has_hna)
 
 #combining into data frame of % surviving each time period/dying within each time period with a HNA
+survival_hna <- survival_hna |> filter(surv_status == "Survived")
+
 survival_hna <- rbind(survival_hna, deaths_hna) |>
   mutate(prop_with_hna = round((has_hna/total)*100, 1)) |>
   rowwise() |>
@@ -233,8 +233,6 @@ survival_pcsp <- patient_level_data |>
   summarize(total = n(), 
             has_pcsp = sum(pcsp_status == "Has PCSP")) 
 
-survival_pcsp <- survival_pcsp |> filter(surv_status == "Survived")
-
 #number of patients dying within each time period and number with a PCSP
 deaths_pcsp <- survival_pcsp |>
   filter(surv_status == "Died") |>
@@ -251,6 +249,8 @@ deaths_pcsp <- survival_pcsp |>
   select(surv_status, time_period, total, has_pcsp)
 
 #combining into data frame of % surviving each time period/dying within each time period with a PCSP
+survival_pcsp <- survival_pcsp |> filter(surv_status == "Survived")
+
 survival_pcsp <- rbind(survival_pcsp, deaths_pcsp) |>
   mutate(prop_with_pcsp = round((has_pcsp/total)*100, 1)) |>
   rowwise() |>

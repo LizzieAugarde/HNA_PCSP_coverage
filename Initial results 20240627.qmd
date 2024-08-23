@@ -103,11 +103,11 @@ Some trusts are not submitting HNA and PCSP data to COSD, meaning patients diagn
 This left a denominator of `r scales::comma(hnas_denom_size)` patients for HNA coverage analysis and `r scales::comma(pcsps_denom_size)` for PCSP coverage analysis, compared to 329,665 patients diagnosed in 2021 recorded in national statistics.
 
 \
-Duplicates:
+Data cleaning:
 
-Of the `r scales::comma(all_records)` of a HNA or PCSP, `r scales::percent(percent_unique_all, accuracy = 0.1)` (`r scales::comma(unique_hnas_pcsps)`) were unique records, meaning `r scales::percent(percent_dups_all, accuracy = 0.1)` were duplicates. This is believed to be primarily because of the way COSD data is submitted by Trusts. Each time something changes in a patient's record, the entire COSD record is resubmitted, meaning a duplicate of any previous HNAs and PCSPs will be created.
+Of the `r scales::comma(all_records)` of a HNA or PCSP, `r scales::percent(percent_unique_all, accuracy = 0.1)` (`r scales::comma(unique_hnas_pcsps)`) were unique records, meaning `r scales::percent(percent_dups_all, accuracy = 0.1)` were duplicates. This is as expected and is a result of the way COSD data is submitted by Trusts. Each time something changes in a patient's record, the entire COSD record is resubmitted, meaning a record of any previous events, such as HNAs and PCSPs, will be resubmitted, creating a second record of that event.
 
-Records were deemed to be duplicates where records matched on the date of the HNA/PCSP, the Trust submitting the HNA/PCSP, and the COSD data items (status code, staff role code, and point of pathway code, see section 4). Duplicates were removed, leaving a dataset of all unique HNA/PCSP records in the 2 years post-diagnosis for each patient. The analysis primarily explores the first recorded HNA and PCSP post-diagnosis for each patient.
+Records were deemed to be duplicates where records matched on the date of the HNA/PCSP, the Trust submitting the HNA/PCSP, and the COSD data items (status code, staff role code, and point of pathway code, see section 4). The data were cleaned on this basis, leaving a dataset of all unique HNA/PCSP records in the 2 years post-diagnosis for each patient. The analysis primarily explores the first recorded HNA and PCSP post-diagnosis for each patient.
 
 ## 3. Status of HNA and PCSP records
 
@@ -146,7 +146,7 @@ HNA and PCSP data is only available in RCRD if the record has a valid date. It i
 \
 NHS numbers:
 
-This analysis uses NHS number to link patients to HNA and PCSP records. There are a very small number of HNA/PCSP records in RCRD with no NHS number (less than 0.01%).
+This analysis uses NHS number to link patients to HNA and PCSP records. There are a very small number of HNA/PCSP records in RCRD with no NHS number (less than 0.01%), and there are very few patients in the cancer registry with no NHS number (less than 0.02% of diagnoses in 2021).
 
 \
 \
@@ -189,9 +189,12 @@ kable(filter(cosd_completeness,
 
 ## 5. Comparison to Macmillan eHNA data
 
-Data from the Macmillan eHNA system for assessments marked as "locked" or "submitted", recorded by each NHS Trust, were compared to the number of unique HNAs recorded as "offered and accepted" in RCRD by Trust, occurring in 2021. This COSD HNA dataset contains HNAs occurring in 2021, rather than associated with patients diagnosed in 2021, as used in the other parts of this analysis.
+Comparing COSD HNA data to Macmillan's eHNA system data is a key aim of this project to enable better understanding of the relationship between the two datasets. The datasets currently serve complementary different purposes for analysis of personalised care delivery. Some but not all NHS
+Trusts use the Macmillan eHNA system to complete HNAs, and in these Trusts only some MDTs may use it, therefore Macmillan eHNA does not cover the full population, whereas COSD is mandatory for everyone diagnosed with cancer. While Macmillan eHNA is primarily a tool to support clinical care, its dataset holds rich detail about the concerns raised and actions taken as part of a HNA and PCSP. COSD, however, contains data from the vast majority of NHS Trusts. It has limited data items but allows for a full assessment of the national and Alliance-level availability of personalised care interventions. Further details are available in the project proposal document. Details of reasons why Trusts' data may not be present in COSD are outlined in section 6
 
-There are significantly more HNAs recorded in the Macmillan eHNA data in 2021, than in COSD. `r length(not_in_ehna)` Trusts with data in RCRD did not appear in the Macmillan eHNA data. `r length(not_in_cosd)` Trusts in the Macmillan eHNA data did not appear in RCRD. Of those Trusts which do appear in both datasets, `r more_in_cosd` have more HNAs recorded in COSD than Macmillan eHNA and `r more_in_ehna` have more recorded in Macmillan eHNA than COSD.
+Assessments marked as "locked" or "submitted" recorded by each NHS Trust were extracted from Macmillan eHNA data. Only assessments where the organisation type was listed as "Healthcare - secondary" were included. These data were compared to the number of unique HNAs recorded as "offered and accepted" in RCRD by Trust, occurring in 2021. This COSD HNA dataset contains HNAs occurring in 2021, rather than associated with patients diagnosed in 2021, as used in the other parts of this analysis.
+
+`r length(not_in_ehna)` Trusts with data in RCRD did not appear in the Macmillan eHNA data. `r length(not_in_cosd)` Trusts in the Macmillan eHNA data did not appear in RCRD. Of those Trusts which do appear in both datasets, `r more_in_cosd` have more HNAs recorded in COSD than Macmillan eHNA and `r more_in_ehna` have more recorded in Macmillan eHNA than COSD.
 
 ###### Figure 5a: Number of unique HNA records in COSD compared to Macmillan eHNA by NHS Trust in 2021
 
@@ -210,19 +213,25 @@ Of the patients who had at least one record of either a HNA or PCSP (`r scales::
 
 ###### Figure 6a: Proportion of patients offered both a HNA and PCSP within 2 years of diagnosis, for those diagnosed in 2021, by the status of their first record
 
-![](C:/Users/elau2/OneDrive - NHS Digital/Documents/HNA_PCSP_coverage/offered_code_matrix_plot.jpeg){style = "width:50%;"}
-
+![](N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/HNA PCSP coverage analysis/offered_code_matrix_plot.jpeg)\
+\
 Most patients with both a HNA and PCSP recorded had their PCSP recorded on the same day as their first HNA (78.9%). Over 85% of these patients had their PCSP within a week of their first HNA record.
 
-There are various reasons why coverage of HNAs and PCSPs is low:
+There are various reasons why this analysis appears to show lower than expected coverage of HNAs and PCSPs from the data available:
 
--   HNAs and PCSPs are not being offered to most patients
+-   HNA and PCSP data capture was affected by the pandemic at least until 2022 because other activities by CNSs and IT and informatics teams were prioritised over personalised care data. Therefore, only a proportion of HNAs and PCSPs that happened were being digitally recorded and then only a proportion of those recorded could be submitted successfully to COSD
 
--   NHS Trusts are not submitting HNA or PCSP data in COSD
+-   HNAs and care plans recorded in eHNA were not being submitted to COSD until a trust chose to implement the interfaces for trust using SCR or Infoflex. However, the trust may be submitting non-eHNA data to COSD so may be included in this analysis but only with a proportion of their HNA activity. NB The SCR interface has a known bug which will not be resolved until a trust adopts v24.1 which is being rolled out in latter half of 2024
 
--   NHS Trusts are submitting records of HNAs and PCSPs without a valid date, meaning it is not recorded in RCRD
+-   HNAs and PCSPs may be recorded only on paper in some teams
 
--   This analysis includes patients of all ages, but very few HNAs and PCSPs are offered to children
+-   HNAs and PCSPs were not being offered to some patients. The reasons for this may include inadequate staff capacity, clinic suspensions during the pandemic, and patient reluctance to attend clinics during the pandemic.
+
+-   Some NHS Trusts were not submitting any or all HNA or PCSP data to COSD
+
+-   Some NHS Trusts were submitting records of HNAs and PCSPs without a valid date, meaning it is not recorded in RCRD
+
+-   This analysis includes patients of all ages, but very few HNAs and PCSPs are recorded in COSD by children's cancer teams
 
 It is difficult to determine the extent to which each of these contribute to the statistics shown here.
 
@@ -299,57 +308,56 @@ The median time between HNAs, where patients have more than 1 recorded, is `r ro
 The median time between multiple PCSPs is `r median_multi_pcsps` days. `r scales::percent(multi_pcsps_within_week, accuracy = 0.1)` of multiple PCSPs for the same patient occur within a week of each other.\
 \
 \
-Deaths:
+Survival:
 
 ###### Figure 7e: Proportion of patients diagnosed in 2021 offered a HNA in the two years post-diagnosis, by survival status
 
-```{r hna_deaths, out.width='100%', fig.align='center'}
+```{r hna_survival, out.width='100%', fig.align='center'}
 
-deaths_hna |> 
-  select(-total) |>
+survival_hna |> 
+  arrange(time_period, surv_status) |>
+  ungroup() |>
+  select(surv_status_table, has_hna, prop_with_hna, lower, upper) |>
   mutate(prop_with_hna = paste0(prop_with_hna, "%"), 
          lower = paste0(lower, "%"),
          upper =  paste0(upper, "%")) |>
-  arrange(time_period) |>
-  kable(format.args = list(big.mark = ","), align = "llcccc", 
-        col.names = c("Time period", 
-                      "Survival status", 
+  kable(format.args = list(big.mark = ","), align = "lcccc", 
+        col.names = c("Survival status", 
                       "Number of patients", 
                       "Proportion of patients", 
                       "Lower 95% confidence limit", 
                       "Upper 95% confidence limit")) |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
-                full_width = F, font_size = 12, position = "center") |>
-  collapse_rows(columns = 1, valign = "middle") |>
-  row_spec(8, hline_after = TRUE) 
+                full_width = F, font_size = 12, position = "center") 
 
-deaths_hna_graph
+surv_hna_graph
 ```
 
 ###### Figure 7f: Proportion of patients diagnosed in 2021 offered a PCSP in the two years post-diagnosis, by survival status
 
-```{r pcsp_deaths, out.width='100%', fig.align='center'}
+```{r pcsp_survival, out.width='100%', fig.align='center'}
 
-deaths_pcsp |> 
-  select(-total) |>
+survival_pcsp |> 
+  arrange(time_period, surv_status) |>
+  ungroup() |>
+  select(surv_status_table, has_pcsp, prop_with_pcsp, lower, upper) |>
   mutate(prop_with_pcsp = paste0(prop_with_pcsp, "%"), 
          lower = paste0(lower, "%"),
          upper =  paste0(upper, "%")) |>
-  arrange(time_period) |>
-  kable(format.args = list(big.mark = ","), align = "llcccc", 
-        col.names = c("Time period", 
-                      "Survival status", 
+  kable(format.args = list(big.mark = ","), align = "lcccc", 
+        col.names = c("Survival status", 
                       "Number of patients", 
                       "Proportion of patients", 
                       "Lower 95% confidence limit", 
                       "Upper 95% confidence limit")) |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
-                full_width = F, font_size = 12, position = "center") |>
-  collapse_rows(columns = 1, valign = "middle")|>
-  row_spec(8, hline_after = TRUE) 
+                full_width = F, font_size = 12, position = "center") 
 
-deaths_pcsp_graph
+surv_pcsp_graph
 ```
+
+\
+*Each "Died" bar in Figure 7f represents patients who survived through the previous time period then died in the measured time period, e.g. the 6 weeks "Died" bar represents patients who died between 4 and 6 weeks post-diagnosis.*
 
 ## 8. Staff roles
 
@@ -438,7 +446,7 @@ patient_level_data |>
 
 <br> <br>
 
-###### Figure 9av: Proportion of patients diagnosed in 2021 with only an offer of a HNA and no PCSP records within 2 years of diagnosis, by gender
+###### Figure 9av: Proportion of patients diagnosed in 2021 whose first HNA is 'offered and accepted' and who have no PCSP records within 2 years of diagnosis, by gender
 
 ```{r hna_only_gender, out.width='100%', fig.align='center'}
 
@@ -534,7 +542,7 @@ patient_level_data |>
 
 <br> <br>
 
-###### Figure 9bv: Proportion of patients diagnosed in 2021 with only an offer of a HNA and no PCSP records within 2 years of diagnosis, by age
+###### Figure 9bv: Proportion of patients diagnosed in 2021 whose first HNA is 'offered and accepted' and who have no PCSP records within 2 years of diagnosis, by age
 
 ```{r hna_only_age, out.width='100%', fig.align='center'}
 
@@ -610,7 +618,7 @@ patient_level_data |>
 
 <br> <br>
 
-###### Figure 9cv: Proportion of patients diagnosed in 2021 with only an offer of a HNA and no PCSP records within 2 years of diagnosis, by ethnicity
+###### Figure 9cv: Proportion of patients diagnosed in 2021 whose first HNA is 'offered and accepted' and who have no PCSP records within 2 years of diagnosis, by ethnicity
 
 ```{r hna_only_ethnicity, out.width='100%', fig.align='center'}
 
@@ -704,7 +712,7 @@ patient_level_data |>
 
 <br> <br>
 
-###### Figure 9dv: Proportion of patients diagnosed in 2021 with only an offer of a HNA and no PCSP records within 2 years of diagnosis, by deprivation decile
+###### Figure 9dv: Proportion of patients diagnosed in 2021 whose first HNA is 'offered and accepted' and who have no PCSP records within 2 years of diagnosis, by deprivation decile
 
 ```{r hna_only_imd, out.width='100%', fig.align='center'}
 
@@ -792,7 +800,7 @@ patient_level_data |>
 
 <br> <br>
 
-###### Figure 9ev: Proportion of patients diagnosed in 2021 with only an offer of a HNA and no PCSP records within 2 years of diagnosis, by tumour type
+###### Figure 9ev: Proportion of patients diagnosed in 2021 whose first HNA is 'offered and accepted' and who have no PCSP records within 2 years of diagnosis, by tumour type
 
 ```{r hna_only_site, out.width='100%', fig.align='center'}
 
@@ -863,7 +871,7 @@ patient_level_data |>
 
 <br> <br>
 
-###### Figure 9fv: Proportion of patients diagnosed in 2021 with only an offer of a HNA and no PCSP records within 2 years of diagnosis, by tumour type
+###### Figure 9fv: Proportion of patients diagnosed in 2021 whose first HNA is 'offered and accepted' and who have no PCSP records within 2 years of diagnosis, by stage at diagnosis
 
 ```{r hna_only_stage, out.width='100%', fig.align='center'}
 

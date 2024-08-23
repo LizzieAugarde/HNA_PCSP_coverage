@@ -13,6 +13,7 @@ library(NDRSAfunctions)
 library(tidyverse)
 library(janitor)
 
+casref01 <- createConnection()
 cas2407 <- createConnection(port = 1525, sid = "cas2407")
 
 
@@ -261,9 +262,9 @@ pcsp_only_patient_level <- anti_join(pcsp_data, both_patient_level, by = "patien
 
 #dataset of patients with neither - taken by subtracting the other groups of patients from the overall cohort
 no_events <- patient_cohort |> 
-  left_join(., hna_only_patient_level |> select(c(patientid, hna_event_type)), by = "patientid") |> 
-  left_join(., pcsp_only_patient_level |> select(c(patientid, pcsp_event_type)), by = "patientid") |>
-  left_join(., both_patient_level |> select(c(patientid, pcsp_event_type)), by = "patientid") |>
+  left_join(hna_only_patient_level |> select(c(patientid, hna_event_type)), by = "patientid") |> 
+  left_join(pcsp_only_patient_level |> select(c(patientid, pcsp_event_type)), by = "patientid") |>
+  left_join(both_patient_level |> select(c(patientid, pcsp_event_type)), by = "patientid") |>
   filter(is.na(hna_event_type) & is.na(pcsp_event_type.x) & is.na(pcsp_event_type.y)) |>
   mutate(hna_event_type = NA, hna_point_of_pathway = NA, hna_staff_role = NA, hna_date = NA, hna_rank = NA, hna_time_diag_event = NA,
          pcsp_event_type = NA, pcsp_point_of_pathway = NA, pcsp_staff_role = NA, pcsp_date = NA, pcsp_rank = NA, pcsp_time_diag_event = NA) |>

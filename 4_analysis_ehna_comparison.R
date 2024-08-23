@@ -19,7 +19,7 @@ query <- "select
   rp.event_date,
   rp.event_end,
   rp.trust_code
-  from analysisncr.at_rapid_pathway@cas2406 rp 
+  from analysisncr.at_rapid_pathway@cas2407 rp 
   where rp.event_type = 20 
   and (rp.event_date >= '01-JAN-2021' AND rp.event_date <= '31-DEC-2021')"
 
@@ -87,7 +87,8 @@ ehna_cosd_comparison_graph <- ggplot(merged_data,
   theme_minimal() +
   scale_color_manual(values = c("#008A26", "#02D462", "#03fca5")) +
   scale_x_continuous(labels = label_comma()) +
-  scale_y_continuous(labels = label_comma()) +
+  scale_y_continuous(labels = label_comma(), 
+                     limits = c(0,40000)) +
   labs(x = "Number of records in Macmillan eHNA", 
        y = "Number of records in COSD", 
        color = "Trust status in each dataset")
