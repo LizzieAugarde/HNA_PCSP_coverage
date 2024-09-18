@@ -27,12 +27,18 @@ trust_hna <- patient_level_data |>
                                    percent >=80 & percent <90 ~ "80% - 90%",
                                    percent >=90 & percent <100 ~ "90% - 100%"))
 
+#dummy table of all percentage groups 
+percent_cats <- data.frame(percent_group = c("Less than 10%", "10% - 20%", "20% - 30%", "30% - 40%", "40% - 50%",
+                                             "50% - 60%", "60% - 70%", "70% - 80%", "80% - 90%", "90% - 100%"),
+                           trust_count_dummy = 0)
+
 #number of trusts with each % coverage
 trust_coverage_hna_cats <- trust_hna |> 
   group_by(percent_group) |>
   summarise(trust_count = n()) |>
-  add_row(percent_group = "70% - 80%", trust_count = 0) |> #adding a row for completeness
-  add_row(percent_group = "90% - 100%", trust_count = 0) |> #adding a row for completeness
+  full_join(percent_cats, by = "percent_group") |>
+  mutate(trust_count = ifelse(is.na(trust_count), trust_count_dummy, trust_count)) |>
+  select(-trust_count_dummy) |>
   mutate(percent_group = fct_relevel(percent_group, "Less than 10%")) |>
   arrange(percent_group)
 
@@ -69,8 +75,9 @@ trust_pcsp <- patient_level_data |>
 trust_coverage_pcsp_cats <- trust_pcsp |> 
   group_by(percent_group) |>
   summarise(trust_count = n()) |>
-  add_row(percent_group = "80% - 90%", trust_count = 0) |> #adding a row for completeness
-  add_row(percent_group = "90% - 100%", trust_count = 0) |> #adding a row for completeness
+  full_join(percent_cats, by = "percent_group") |>
+  mutate(trust_count = ifelse(is.na(trust_count), trust_count_dummy, trust_count)) |>
+  select(-trust_count_dummy) |>
   mutate(percent_group = fct_relevel(percent_group, "Less than 10%")) |>
   arrange(percent_group)
 

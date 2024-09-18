@@ -91,6 +91,11 @@ ehna_cosd_comparison_graph <- ggplot(merged_data,
                      limits = c(0,40000)) +
   labs(x = "Number of records in Macmillan eHNA", 
        y = "Number of records in COSD", 
-       color = "Trust status in each dataset")
+       color = "Trust status in each dataset") +
+  theme(axis.text.x = element_text(angle = 45, hjust=1),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 12))
 
   

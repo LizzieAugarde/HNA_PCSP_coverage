@@ -7,6 +7,7 @@
 #Created April 2024 by Lizzie Augarde 
 ##########################################################################################
 
+library(scales)
 
 patient_level_data <- patient_level_data |>
   mutate(hna_status = ifelse(hna_count != "0", "Has HNA", "No HNA"),
@@ -21,9 +22,9 @@ gender_hna <- patient_level_data |>
   group_by(gender) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         proptest = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(proptest, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
   filter(!is.na(gender), hna_status == "Has HNA") |>
@@ -38,9 +39,9 @@ gender_pcsp <- patient_level_data |>
   group_by(gender) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         proptest = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(proptest, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
   filter(!is.na(gender), pcsp_status == "Has PCSP") |>
@@ -66,6 +67,7 @@ gender_pcsp_graph <- ggplot(gender_pcsp, aes(x = gender, y = percent)) +
 
 #proportions with a HNA and no PCSP
 gender_full_status <- patient_level_data |>
+  filter(keepforpcsp == "INCLUDE" & keepforhna == "INCLUDE") |>
   filter(hna_offered_code == "03") |>
   mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
                                  hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
@@ -102,9 +104,9 @@ age_hna <- patient_level_data |>
   group_by(age_group) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         proptest = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(proptest, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
   filter(!is.na(age_group), hna_status == "Has HNA") |>
@@ -118,9 +120,9 @@ age_pcsp <- patient_level_data |>
   group_by(age_group) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         proptest = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(proptest, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
   filter(!is.na(age_group), pcsp_status == "Has PCSP") |>
@@ -147,6 +149,7 @@ age_pcsp_graph <- ggplot(age_pcsp,
 
 #proportions with a HNA and no PCSP
 age_full_status <- patient_level_data |>
+  filter(keepforpcsp == "INCLUDE" & keepforhna == "INCLUDE") |>
   filter(hna_offered_code == "03") |>
   mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
                                  hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
@@ -162,7 +165,7 @@ age_full_status <- patient_level_data |>
 
 ####by ethnicity-------------------
 patient_level_data <- patient_level_data |>
-  mutate(ethnicity_group = case_when(ethnicity %in% c("A", "B", "C") ~ "White",
+  mutate(ethnicity_group = case_when(ethnicity %in% c("A", "B", "C", "0") ~ "White",
                                      ethnicity %in% c("D", "E", "F", "G") ~ "Mixed",
                                      ethnicity %in% c("H", "J", "K", "L") ~ "Asian",
                                      ethnicity %in% c("M", "N", "P") ~ "Black",
@@ -178,9 +181,9 @@ ethnicity_hna <- patient_level_data |>
   group_by(ethnicity_group) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         proptest = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(proptest, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
   filter(!is.na(ethnicity_group), hna_status == "Has HNA") |>
@@ -194,9 +197,9 @@ ethnicity_pcsp <- patient_level_data |>
   group_by(ethnicity_group) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         proptest = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(proptest, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
   filter(!is.na(ethnicity_group), pcsp_status == "Has PCSP") |>
@@ -223,6 +226,7 @@ ethnicity_pcsp_graph <- ggplot(filter(ethnicity_pcsp, ethnicity_pcsp$pcsp_status
 
 #proportions with a HNA and no PCSP
 ethnicity_full_status <- patient_level_data |>
+  filter(keepforpcsp == "INCLUDE" & keepforhna == "INCLUDE") |>
   filter(hna_offered_code == "03") |>
   mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
                                  hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
@@ -245,9 +249,9 @@ imd_hna <- patient_level_data |>
   group_by(imd19_decile_lsoas) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         proptest = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(proptest, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
   filter(!is.na(imd19_decile_lsoas), hna_status == "Has HNA") |>
@@ -264,9 +268,9 @@ imd_pcsp <- patient_level_data |>
   group_by(imd19_decile_lsoas) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         proptest = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(proptest, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
   filter(!is.na(imd19_decile_lsoas), pcsp_status == "Has PCSP") |>
@@ -296,6 +300,7 @@ imd_pcsp_graph <- ggplot(imd_pcsp,
 
 #proportions with a HNA and no PCSP
 imd_full_status <- patient_level_data |>
+  filter(keepforpcsp == "INCLUDE" & keepforhna == "INCLUDE") |>
   filter(hna_offered_code == "03") |>
   mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
                                  hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
@@ -316,13 +321,23 @@ site_hna <- patient_level_data |>
   summarise(number_patients = n()) |>
   ungroup() |>
   group_by(ndrs_main) |>
+  mutate(suppress = ifelse(sum(number_patients)<1000, "Suppress", "Don't suppress")) 
+
+site_suppression_hna <- site_hna |> select(ndrs_main, suppress) |> unique() #extracting suppression status for the HNA only table below
+
+site_hna <- site_hna |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         proptest = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(proptest, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
+  mutate(number_patients_table = as.character(ifelse(suppress == "Suppress", "-", number_patients)),
+         percent_table = ifelse(suppress == "Suppress", "-", percent_table),
+         lower_table = ifelse(suppress == "Suppress", "-", lower_table),
+         upper_table = ifelse(suppress == "Suppress", "-", upper_table)) |>
+  select(-suppress) |>
   filter(!is.na(ndrs_main), hna_status == "Has HNA") |>
   ungroup() 
 
@@ -332,13 +347,19 @@ site_pcsp <- patient_level_data |>
   summarise(number_patients = n()) |>
   ungroup() |>
   group_by(ndrs_main) |>
+  mutate(suppress = ifelse(sum(number_patients)<1000, "Suppress", "Don't suppress")) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         proptest = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(proptest, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
+  mutate(number_patients_table = as.character(ifelse(suppress == "Suppress", "-", number_patients)),
+         percent_table = ifelse(suppress == "Suppress", "-", percent_table),
+         lower_table = ifelse(suppress == "Suppress", "-", lower_table),
+         upper_table = ifelse(suppress == "Suppress", "-", upper_table)) |>
+  select(-suppress) |>
   filter(!is.na(ndrs_main), pcsp_status == "Has PCSP") |>
   ungroup()
 
@@ -364,6 +385,7 @@ site_pcsp_graph <- ggplot(site_pcsp,
 #proportions with a HNA and no PCSP
 site_full_status <- patient_level_data |>
   filter(ndrs_main != "to be grouped", ndrs_main != "See skin table") |>
+  filter(keepforpcsp == "INCLUDE" & keepforhna == "INCLUDE") |>
   filter(hna_offered_code == "03") |>
   mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
                                  hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 
@@ -373,7 +395,12 @@ site_full_status <- patient_level_data |>
   ungroup() |>
   group_by(ndrs_main) |>
   mutate(percent = percent((number_patients/sum(number_patients)), accuracy = 0.1)) |>
+  left_join(site_suppression_hna, by = "ndrs_main") |>
+  mutate(number_patients = as.character(ifelse(suppress == "Suppress", "-", number_patients)),
+         percent = ifelse(suppress == "Suppress", "-", percent)) |>
+  select(-suppress) |>
   filter(!is.na(ndrs_main), full_status == "HNA only")
+
 
 
 ####by stage------------
@@ -385,9 +412,9 @@ stage_hna <- patient_level_data |>
   group_by(STAGE) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         proptest = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(proptest, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
   filter(hna_status == "Has HNA", !is.na(STAGE), STAGE != "Error", STAGE != "Missing") |>
@@ -401,9 +428,9 @@ stage_pcsp <- patient_level_data |>
   group_by(STAGE) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1),
-         lower = lapply(number_patients, prop.test, n = sum(number_patients)), 
-         upper = round((sapply(lower, function(x) x$conf.int[2]))*100, digits = 1), 
-         lower = round((sapply(lower, function(x) x$conf.int[1]))*100, digits = 1),
+         proptest = lapply(number_patients, prop.test, n = sum(number_patients)), 
+         upper = round((sapply(proptest, function(x) x$conf.int[2]))*100, digits = 1), 
+         lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
   filter(pcsp_status == "Has PCSP", !is.na(STAGE), STAGE != "Error", STAGE != "Missing") |>
@@ -430,6 +457,7 @@ stage_pcsp_graph <- ggplot(stage_pcsp,
 
 #proportions with a HNA and no PCSP
 stage_full_status <- patient_level_data |>
+  filter(keepforpcsp == "INCLUDE" & keepforhna == "INCLUDE") |>
   filter(hna_offered_code == "03") |>
   mutate(full_status = case_when(hna_status == "Has HNA" & pcsp_status == "No PCSP" ~ "HNA only", 
                                  hna_status == "Has HNA" & pcsp_status == "Has PCSP" ~ "Both", 

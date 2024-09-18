@@ -37,8 +37,8 @@ death_check_pcsp <- hna_pcsp_data %>%
   mutate(death_event_diff = difftime(deathdatebest, event_date, unit = "days")) %>%
   filter(death_event_diff < 0)
 
-death_check_hna <- length(death_check_hna$patientid)
-death_check_pcsp <- length(death_check_pcsp$patientid)
+death_check_hna <- length(death_check_hna$patientid) #number of HNAs occurring after death
+death_check_pcsp <- length(death_check_pcsp$patientid) #number of PCSPs occurring after death
 
 death_check <- data.frame(event_type = c("HNA", "PCSP"), 
                           count = c(death_check_hna, death_check_pcsp)) %>%

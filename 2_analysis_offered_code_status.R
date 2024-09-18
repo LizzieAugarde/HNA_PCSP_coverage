@@ -10,9 +10,6 @@ library(scales)
 
 ###### OFFERED CODES FOR HNAs AND PCSPs ######
 offered_code_data <- hna_pcsp_data |>
-  filter(offered_code != "04") |> #excluding records which are "Not offered"
-  filter(offered_code != "" & offered_code != "08/03/2023" & offered_code != "16/06/2023") |> #removing weird codes
-  mutate(offered_code = ifelse(offered_code == "001", "01", offered_code)) |> 
   group_by(event_type, offered_code) |>
   summarise(count = n()) |>
   group_by(event_type) |>
@@ -31,7 +28,7 @@ offered_code_data <- hna_pcsp_data |>
 
 ###### RELATIONSHIP BETWEEN FIRST HNA AND PCSP STATUS ######
 offered_code_matrix <- patient_level_data |> 
-  select(patientid, hna_offered_code, pcsp_offered_code) |>
+  select(hna_offered_code, pcsp_offered_code) |>
   filter(!is.na(hna_offered_code), !is.na(pcsp_offered_code)) |>
   mutate(hna_offered_code_desc = case_when(hna_offered_code == "01" ~ "Offered and undecided", 
                                            hna_offered_code == "02" ~ "Offered and declined", 
