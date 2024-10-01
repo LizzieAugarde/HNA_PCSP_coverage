@@ -23,8 +23,8 @@ staff_role_data <- hna_pcsp_data |>
                                      staff_role == "02" ~ "Other nurse", 
                                      staff_role == "03" ~ "Allied Health Professional", 
                                      staff_role == "04" ~ "Support worker", 
-                                     staff_role == "05" ~ "Psychologist/Mental health professional", 
-                                     staff_role == "06" ~ "Consultant/medical team",
+                                     staff_role == "05" ~ "Psychologist/  Mental health professional", 
+                                     staff_role == "06" ~ "Consultant/ medical team",
                                      staff_role == "08" ~ "Other",
                                      TRUE ~ "Not known")) 
 
@@ -34,6 +34,7 @@ staff_role_graph <- ggplot(staff_role_data, aes(x = staff_role_desc, y = percent
   scale_fill_manual(values = c("#008A26", "#02D462")) +
   labs(x = "Staff role", y = "Proportion of events", fill = "") + 
   scale_y_continuous(limits = c(0, 100)) +
+  scale_x_discrete(labels = label_wrap(13)) +
   theme(axis.text.x = element_text(angle = 45, hjust=1),
         axis.text = element_text(size = 12),
         axis.title = element_text(size = 14), 

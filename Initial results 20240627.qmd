@@ -84,19 +84,19 @@ Data on HNAs and PCSPs are submitted to the NHS England [Cancer Outcomes and Ser
 \
 Patient cohort:
 
-Data on patients diagnosed in 2021 with a malignant cancer (C00-C97 excluding C44) were extracted from the registry. For patients with multiple tumours diagnosed in 2021, their first diagnosed tumour is used. All patients are included, regardless of whether they have any subsequent or previous diagnoses. Patients diagnosed with a stage 0 tumour were excluded from the analysis. Also excluded were death certificate only diagnoses, and patients who were diagnosed and died on the same day. There was a small number of patients with a death date recorded before their diagnosis date, who were also excluded. Lastly, a small number of patients (61) were not present in RCRD diagnosis records or , as RCRD is not enhanced with the extra steps taken to create 'gold standard' registrations (see link above). These patients were also excluded.
+Data on patients diagnosed in 2021 with a malignant cancer (C00-C97 excluding C44) were extracted from the registry. For patients with multiple tumours diagnosed in 2021, their first diagnosed tumour is used. All patients are included, regardless of whether they have any subsequent or previous diagnoses. Patients diagnosed with a stage 0 tumour were excluded from the analysis. Also excluded were death certificate only diagnoses, and patients who were diagnosed and died on the same day. There was a small number of patients with a death date recorded before their diagnosis date, who were also excluded. Lastly, a small number of patients (61) were not present in RCRD diagnosis records, as RCRD is not enhanced with the extra steps taken to create 'gold standard' registrations (see link above). These patients were also excluded.
 
 \
 Linkage:
 
 HNA and PCSP records in RCRD were linked to the patient cohort on NHS number. Tumour records are linked to patients on patient ID and the first diagnosed tumour in 2021 used for this analysis. Other variables including tumour site grouping and deprivation decile were linked on tumour ID.
 
-RCRD data can only be linked to the patient cohort described above at patient level, not tumour level. Therefore HNA and PCSP records are associated with a patient not a tumour, and some linked HNAs and PCSPs may be for a subsequent diagnosis in 2021. For a small number of patients, this might mean a HNA/PCSP is inaccurately assigned to a trust of diagnosis, tumour site, stage at diagnosis, and deprivation decile.
+RCRD data can only be linked to the patient cohort described above at patient level, not tumour level. Therefore HNA and PCSP records are associated with a patient not a tumour, and some linked HNAs and PCSPs may be for a previous or subsequent diagnosis. For a small number of patients, this might mean a HNA/PCSP is inaccurately assigned to a trust of diagnosis, tumour site, stage at diagnosis, and deprivation decile.
 
 \
 Non-submitting Trusts:
 
-Some trusts are not submitting HNA and PCSP data to COSD, meaning patients diagnosed at these trusts were excluded from this analysis. Patients diagnosed at trusts meeting the following criteria were excluded:
+Some trusts are not submitting HNA and PCSP data to COSD, though it is difficult to ascertain for certain which trusts are not submitting. Patients diagnosed at trusts considered to be submitting very low or no HNA/PCSP data were excluded from the analysis, to try to ensure the denominator was as accurate as possible in terms of representing trusts which are submitting HNA and PCSP data to COSD. Patients diagnosed at trusts meeting the following criteria were excluded:
 
 -   Trusts with fewer than 10 HNA/PCSP records and fewer than 100 patients diagnosed in 2021
 
@@ -110,6 +110,11 @@ Data cleaning:
 Of the `r scales::comma(all_records)` records of a HNA or PCSP, `r scales::percent(percent_unique_all, accuracy = 0.1)` (`r scales::comma(unique_hnas_pcsps)`) were unique records, meaning `r scales::percent(percent_dups_all, accuracy = 0.1)` were duplicates. This is as expected and is a result of the way COSD data is submitted by Trusts. Each time something changes in a patient's record, the entire COSD record is resubmitted, meaning a record of any previous events, such as HNAs and PCSPs, will be resubmitted, creating a second record of that event.
 
 Records were deemed to be duplicates where records matched on the date of the HNA/PCSP, the Trust submitting the HNA/PCSP, and the COSD data items (status code, staff role code, and point of pathway code, see section 4). The data were cleaned on this basis, leaving a dataset of all unique HNA/PCSP records in the 2 years post-diagnosis for each patient. The analysis primarily explores the first recorded HNA and PCSP post-diagnosis for each patient.
+
+\
+Acknowledgements:
+
+This work uses data that has been provided by patients and collected by the NHS as part of their care and support. The data is collated, maintained and quality assured by the National Cancer Registration and Analysis Service, which is part of NHS England.
 
 ## 3. Status of HNA and PCSP records
 
@@ -142,7 +147,7 @@ kable(offered_code_data, align = "llcc",
 
 Dates:
 
-HNA and PCSP data is only available in RCRD if the record has a valid date. It is impossible to determine the extent to which missing or invalid date recording contributes to the overall missingness of the data.
+HNA and PCSP data is only available in RCRD if the record has a valid date. It was not possible to determine the extent to which missing or invalid date recording contributes to the overall missingness of the data.
 
 \
 \
@@ -195,7 +200,7 @@ Comparing COSD HNA data to Macmillan's eHNA system data is a key aim of this pro
 
 While Macmillan eHNA is primarily a tool to support clinical care, its dataset holds rich detail about the concerns raised and actions taken as part of a HNA and PCSP. COSD collects a record of the event date, offered status, the role fo the staff member delivering the intervention, and the point in the cancer pathway when the event occurred. Unlike Macmillan eHNA, it does not include data items covering the content of the HNA or PCSP events, but allows for a full assessment of the national and Alliance-level availability of personalised care interventions.
 
-Further details are available in the project proposal document. Details of reasons why Trusts' data may not be present in COSD are outlined in section 6.
+Details of reasons why Trusts' data may not be present in COSD are outlined in section 6.
 
 Assessments marked as "locked" or "submitted" recorded by each NHS Trust were extracted from Macmillan eHNA data. Only assessments where the organisation type was listed as "Healthcare - secondary" were included. These data were compared to the number of unique HNAs recorded as "offered and accepted" in RCRD by Trust, occurring in 2021. This COSD HNA dataset contains HNAs occurring in 2021, rather than associated with patients diagnosed in 2021, as used in the other parts of this analysis.
 
@@ -373,7 +378,7 @@ surv_pcsp_graph
 
 COSD collects the 'staff role' of the person delivering a HNA/PCSP. This is defined by the person submitting the record using a numerical code. Figure 8a shows the proportion of unique HNA and PCSP records with each COSD staff role code and the description of that code taken from the [COSD user guide](https://digital.nhs.uk/ndrs/data/data-sets/cosd/cosd-user-guide/core---clinical-nurse-specialist).
 
-The most common staff role recorded for both HNas and PCSPs is '01 - Cancer Nurse Specialist', followed by '04 - Support worker' (Figure 8a).
+The most common staff role recorded for both HNAs and PCSPs is '01 - Cancer Nurse Specialist', followed by '04 - Support worker' (Figure 8a).
 
 ###### Figure 8a: Proportion of HNA and PCSP records with each staff role code, all unique records for patients diagnosed in 2021, excluding those recorded as 'not offered'
 
@@ -381,7 +386,10 @@ The most common staff role recorded for both HNas and PCSPs is '01 - Cancer Nurs
 
 staff_role_data <- staff_role_data |>
   select(-c(count, total_count, percent_graph)) |>
-  pivot_wider(names_from = "event_type", values_from = "percent") 
+  pivot_wider(names_from = "event_type", values_from = "percent") |>
+  mutate(staff_role_desc = case_when(staff_role_desc == "CNS"~ "Cancer Nurse Specialist (CNS)", 
+                                     staff_role_desc == "AHP" ~ "Allied Heath Professional (AHP)", 
+                                     staff_role_desc == "Psychologist/MH professional"	~ "Psychologist/Mental health professional", TRUE ~ staff_role_desc ))
 
 kable(staff_role_data, align = "llcc", col.names = c("Staff role code",
                                                     "Staff role",
@@ -749,7 +757,8 @@ For some tumour types, the total number of patients diagnosed in 2021 is less th
 ```{r site_hna, out.width='100%', fig.align='center'}
 
 site_hna |> 
-  select(-c(proptest, lower, upper, number_patients, percent, hna_status)) |>
+  select(-c(proptest, lower, upper, number_patients, 
+            percent, hna_status, suppress)) |>
   select(c(ndrs_main, number_patients_table, percent_table, lower_table, upper_table)) |>
   kable(format.args = list(big.mark = ","), align = "lcccc", 
         col.names = c("Tumour type",
@@ -768,7 +777,8 @@ site_hna_graph
 ```{r site_pcsp, out.width='100%', fig.align='center'}
 
 site_pcsp |> 
-  select(-c(proptest, lower, upper, number_patients, percent, pcsp_status)) |>
+  select(-c(proptest, lower, upper, number_patients, 
+            percent, pcsp_status, suppress)) |>
   select(c(ndrs_main, number_patients_table, percent_table, lower_table, upper_table)) |>
   kable(format.args = list(big.mark = ","), align = "lcccc", 
         col.names = c("Tumour type",
@@ -862,6 +872,7 @@ stage_pcsp_graph
 ```{r median_hna_stage, out.width='100%', fig.align='left'}
 
 patient_level_data |>
+  filter(!is.na(STAGE), STAGE != "Error") |>
   group_by(STAGE) |>
   summarise(median = median(hna_time_diag_event, na.rm = TRUE)) |>
   filter(!is.na(STAGE)) |>
@@ -877,6 +888,7 @@ patient_level_data |>
 ```{r median_pcsp_stage, out.width='100%', fig.align='left'}
 
 patient_level_data |>
+  filter(!is.na(STAGE), STAGE != "Error") |>
   group_by(STAGE) |>
   summarise(median = median(pcsp_time_diag_event, na.rm = TRUE)) |>
   filter(!is.na(STAGE)) |>
