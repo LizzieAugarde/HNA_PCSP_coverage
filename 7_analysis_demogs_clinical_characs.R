@@ -337,7 +337,6 @@ site_hna <- site_hna |>
          percent_table = ifelse(suppress == "Suppress", "-", percent_table),
          lower_table = ifelse(suppress == "Suppress", "-", lower_table),
          upper_table = ifelse(suppress == "Suppress", "-", upper_table)) |>
-  select(-suppress) |>
   filter(!is.na(ndrs_main), hna_status == "Has HNA") |>
   ungroup() 
 
@@ -359,11 +358,10 @@ site_pcsp <- patient_level_data |>
          percent_table = ifelse(suppress == "Suppress", "-", percent_table),
          lower_table = ifelse(suppress == "Suppress", "-", lower_table),
          upper_table = ifelse(suppress == "Suppress", "-", upper_table)) |>
-  select(-suppress) |>
   filter(!is.na(ndrs_main), pcsp_status == "Has PCSP") |>
   ungroup()
 
-site_hna_graph <- ggplot(site_hna, 
+site_hna_graph <- ggplot(filter(site_hna, site_hna$suppress != "Suppress"), 
                         aes(x = ndrs_main, y = percent)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
@@ -372,7 +370,7 @@ site_hna_graph <- ggplot(site_hna,
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust=1))
 
-site_pcsp_graph <- ggplot(site_pcsp, 
+site_pcsp_graph <- ggplot(filter(site_pcsp, site_pcsp$suppress != "Suppress"),  
                          aes(x = ndrs_main, y = percent)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "#008A26") + 
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) +
@@ -417,7 +415,7 @@ stage_hna <- patient_level_data |>
          lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(hna_status == "Has HNA", !is.na(STAGE), STAGE != "Error", STAGE != "Missing") |>
+  filter(hna_status == "Has HNA", !is.na(STAGE), STAGE != "Error") |>
   ungroup() 
 
 stage_pcsp <- patient_level_data |>
@@ -433,7 +431,7 @@ stage_pcsp <- patient_level_data |>
          lower = round((sapply(proptest, function(x) x$conf.int[1]))*100, digits = 1),
          lower_table = paste0(lower,"%"), 
          upper_table = paste0(upper, "%")) |>
-  filter(pcsp_status == "Has PCSP", !is.na(STAGE), STAGE != "Error", STAGE != "Missing") |>
+  filter(pcsp_status == "Has PCSP", !is.na(STAGE), STAGE != "Error") |>
   ungroup()
 
 stage_hna_graph <- ggplot(stage_hna, 
