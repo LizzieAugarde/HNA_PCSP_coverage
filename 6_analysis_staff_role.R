@@ -19,11 +19,11 @@ staff_role_data <- hna_pcsp_data |>
          percent_graph = (count/total_count)*100) |>
   ungroup() |>
   mutate(event_type = ifelse(event_type == 20, "HNA", "PCSP"),
-         staff_role_desc = case_when(staff_role == "01" ~ "CNS", 
+         staff_role_desc = case_when(staff_role == "01" ~ "Cancer Nurse Specialist", 
                                      staff_role == "02" ~ "Other nurse", 
-                                     staff_role == "03" ~ "AHP", 
+                                     staff_role == "03" ~ "Allied Health Professional", 
                                      staff_role == "04" ~ "Support worker", 
-                                     staff_role == "05" ~ "Psychologist/MH professional", 
+                                     staff_role == "05" ~ "Psychologist/Mental health professional", 
                                      staff_role == "06" ~ "Consultant/medical team",
                                      staff_role == "08" ~ "Other",
                                      TRUE ~ "Not known")) 
