@@ -19,7 +19,7 @@ rcrd_missing_diags <- rcrd_missing_diags |>
   clean_names() |>
   unique() |>
   mutate(rcrd_status = "Missing from RCRD") |>
-  select(-nhsnumber)
+  select(-c(nhsnumber))
 
 patient_cohort <- patient_cohort |> 
   clean_names() |>
@@ -204,7 +204,7 @@ pcsp_count <- pcsp_data |>
 #keeping only 1st HNAs
 hna_data <- hna_data |>
   filter(rank == 1) |>
-  select(-c(hna, pcsp, keepforpcsp, pcsp_rank, hna_rank)) |>
+  select(-c(hna, pcsp, keepforpcsp)) |>
   rename("hna_event_type" = "event_type", "hna_point_of_pathway" = "point_of_pathway", "hna_staff_role" = "staff_role", "hna_date" = "event_date", 
          "hna_rank" = "rank", "hna_time_diag_event" = "time_diag_event", "hna_offered_code" = "offered_code") |>
   ungroup()
@@ -256,8 +256,8 @@ patient_level_data <- patient_level_data |>
          pcsp_status = ifelse(pcsp_count > 0, "Has PCSP", "No PCSP")) |>
   ungroup()
 
-#readding trust exclusion status (this gets mixed up above so readding from the patient cohort df)
+#reading trust exclusion status (this gets mixed up above so reading from the patient cohort df)
 patient_level_data <- patient_level_data |>
-  select(-keepforhna, -keepforpcsp)
+  select(-keepforhna.x, -keepforpcsp.x, -keepforhna.y, -keepforpcsp.y)
   
 patient_level_data <- left_join(patient_level_data, patient_cohort |> select(c(patientid, keepforhna, keepforpcsp)), by = "patientid")

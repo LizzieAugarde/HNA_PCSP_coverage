@@ -27,6 +27,8 @@ query <- "select * from (
   tum.deathdatebest,
   tum.diag_trust,
   imd.imd19_decile_lsoas,
+  geo.icb_2022_name,
+  geo.icb_2022_code,
   site.ndrs_main,
   rank () over (partition by pat.patientid order by tum.diagnosisdatebest, tum.tumourid asc) as rank
   from av2021.at_patient_england@casref01 pat 

@@ -90,28 +90,16 @@ trust_pcsp_graph <- ggplot(trust_coverage_pcsp_cats, aes(x = percent_group, y = 
 
 
 ############# COVERAGE BY ICB #############
-#query to aggregate to ICB level
-query <- "select a.tumourid,
-                 b.icb_2022_name,
-                 b.icb_2022_code
-          from analysiselizabethaugarde.hna_pcsps_patient_cohort@casref01 a
-          left join av2021.at_geography_england@casref01 b on a.tumourid = b.tumourid"
-
-patients_geog <- dbGetQueryOracle(casref01, query, rowlimit = NA)
-
-#joining patient data with ICB 
-patients_geog <- left_join(patients_geog, patient_level_data, by = c("TUMOURID" = "tumourid"))
-
 #aggregating HNA coverage to ICB level
-icb_coverage_hna <- patients_geog |>
+icb_coverage_hna <- patient_level_data |>
   filter(keepforhna == "INCLUDE") |>
-  group_by(ICB_2022_CODE, hna_status) |>
+  group_by(icb_2022_code, hna_status) |>
   summarise(number_patients = n()) |>
   ungroup() |>
-  group_by(ICB_2022_CODE) |>
+  group_by(icb_2022_code) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1)) |>
-  filter(!is.na(ICB_2022_CODE), hna_status == "Has HNA") |>
+  filter(!is.na(icb_2022_code), hna_status == "Has HNA") |>
   mutate(percent_group = case_when(percent <10 ~ "Less than 10%",
                                    percent >=10 & percent <20 ~ "10% - 20%",
                                    percent >=20 & percent <30 ~ "20% - 30%",
@@ -133,13 +121,13 @@ icb_coverage_hna <- patients_geog |>
 #aggregating PCSP coverage to ICB level
 icb_coverage_pcsp <- patients_geog |>
   filter(keepforpcsp == "INCLUDE") |>
-  group_by(ICB_2022_CODE, pcsp_status) |>
+  group_by(icb_2022_code, pcsp_status) |>
   summarise(number_patients = n()) |>
   ungroup() |>
-  group_by(ICB_2022_CODE) |>
+  group_by(icb_2022_code) |>
   mutate(percent = (number_patients/sum(number_patients))*100,
          percent_table = percent((number_patients/sum(number_patients)), accuracy = 0.1)) |>
-  filter(!is.na(ICB_2022_CODE), pcsp_status == "Has PCSP") |>
+  filter(!is.na(icb_2022_code), pcsp_status == "Has PCSP") |>
   mutate(percent_group = case_when(percent <10 ~ "Less than 10%",
                                    percent >=10 & percent <20 ~ "10% - 20%",
                                    percent >=20 & percent <30 ~ "20% - 30%",
@@ -167,8 +155,8 @@ library(tmap)
 icbs <- read_sf("N:/INFO/_LIVE/NCIN/Macmillan_Partnership/HNAs/COSD level 3 analysis/Data/ICB_JUL_2022_EN_BFC_V2.shp")
 
 #joining boundary to data 
-icbs_hna <- left_join(icbs, icb_coverage_hna, by = c("ICB22CD" = "ICB_2022_CODE"))
-icbs_pcsp <- left_join(icbs, icb_coverage_pcsp, by = c("ICB22CD" = "ICB_2022_CODE"))
+icbs_hna <- left_join(icbs, icb_coverage_hna, by = c("ICB22CD" = "icb_2022_code"))
+icbs_pcsp <- left_join(icbs, icb_coverage_pcsp, by = c("ICB22CD" = "icb_2022_code"))
 
 #HNA coverage map and save
 hna_map <- tm_shape(icbs_hna) +
